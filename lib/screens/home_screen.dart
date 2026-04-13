@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../services/authService.dart';
-import 'loginScreen.dart';
+import '../services/auth_service.dart';
+import 'login_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});

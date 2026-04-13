@@ -176,7 +176,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
             // Category Dropdown
             DropdownButtonFormField<String>(
-              value: selectedCategory,
+              initialValue: selectedCategory,
               dropdownColor: const Color(0xFF212121),
               style: const TextStyle(color: Colors.white),
               decoration: _inputDecoration('Category'),
@@ -260,7 +260,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
             // Location Dropdown
             DropdownButtonFormField<String>(
-              value: selectedLocation,
+              initialValue: selectedLocation,
               dropdownColor: const Color(0xFF212121),
               style: const TextStyle(color: Colors.white),
               decoration: _inputDecoration('Location'),
