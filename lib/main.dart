@@ -8,16 +8,16 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const QuizRadarApp());
+  runApp(const GatherUpApp());
 }
 
-class QuizRadarApp extends StatelessWidget {
-  const QuizRadarApp({super.key});
+class GatherUpApp extends StatelessWidget {
+  const GatherUpApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'QuizRadar',
+      title: 'GatherUp',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark,
