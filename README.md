@@ -6,3 +6,4 @@ This mobile app is being developed using the Flutter framework.
 
 Our team consists of : Youssef El Bassumi, Kaan Gürelik, İsmail Efe İnce,Utku Özgenç and İsmail Kerem Mescioğlu.
 
+( Step 3 Information for TA: The Login form is currently a mockup. You can enter any input for the email/password fields and navigate freely. )
