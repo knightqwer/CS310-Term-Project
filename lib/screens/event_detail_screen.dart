@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import '../utils/app_colors.dart';
+import '../utils/app_paddings.dart';
+import '../utils/app_routes.dart';
+import '../utils/app_text_styles.dart';
 
 class EventDetailScreen extends StatelessWidget {
   const EventDetailScreen({super.key});
@@ -6,130 +10,155 @@ class EventDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[400], // matching that darker background from the sketch
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: Colors.transparent, // making the bar invisible to blend in
-        elevation: 0, // removing the shadow line
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context), // just going back to the last page
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Event Details',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-        ),
+        title: Text('Event Details', style: AppTextStyles.title),
       ),
-      body: SingleChildScrollView( // making it scrollable so it doesn't break on small screens
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Container(
-            padding: const EdgeInsets.all(20.0),
-            decoration: BoxDecoration(
-              color: Colors.grey[300], // this is that lighter grey card in the middle
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container( // that little green upcoming tag at the top
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.green),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Text(
-                    'Upcoming',
-                    style: TextStyle(color: Colors.green, fontSize: 12),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                const Text( // main header for the event
-                  'Study Session',
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 24),
-                _buildInfoRow(Icons.calendar_today, 'Date & Time', 'Apr 12, 2026 | 14:00'), // showing the time
-                _buildInfoRow(Icons.location_on, 'Location', 'Information Center, Room 204'), // showing the place
-                _buildInfoRow(Icons.person, 'Organizer', 'Name Surname'), // who made it
-                _buildInfoRow(Icons.groups, 'Attendees', '8/20 registered'), // checking the count
-                const SizedBox(height: 24),
-                const Text( // section title for the description
-                  'About this Event',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                const Text( // this is the bio text the user wrote
-                  'This text includes whatever the organizer wrote in the bio part. '
-                      '"Come join us for this event" - "I need some help prepping for an exam" '
-                      '- "I want some company/meet new people"',
-                  style: TextStyle(color: Colors.black87, height: 1.4),
-                ),
-                const SizedBox(height: 24),
-                const Text( // header for the tags list
-                  'Associated Tags',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 12),
-                Wrap( // using wrap so tags flow to the next line if they are too long
-                  spacing: 8,
-                  children: [
-                    _buildTag('Social'),
-                    _buildTag('Other'),
-                    _buildTag('Study'),
-                    _buildTag('Sports'),
-                  ],
-                ),
-                const SizedBox(height: 40),
-                Row( // putting the register button and chat next to each other
-                  children: [
-                    Expanded( // making the button stretch to fill the space
-                      child: ElevatedButton(
-                        onPressed: () {}, // doing nothing for now since it is just ui
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final maxWidth = constraints.maxWidth > 600 ? 560.0 : constraints.maxWidth;
+          return SingleChildScrollView(
+            child: Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: maxWidth),
+                child: Padding(
+                  padding: const EdgeInsets.all(AppPaddings.lg),
+                  child: Container(
+                    padding: const EdgeInsets.all(AppPaddings.lg),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AspectRatio(
+                          aspectRatio: 16 / 9,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: AppColors.background,
+                              border: Border.all(color: AppColors.border),
+                            ),
+                            child: Image.network(
+                              'https://freesvg.org/img/1460481845.png',
+                              fit: BoxFit.contain,
+                              loadingBuilder: (context, child, progress) {
+                                if (progress == null) return child;
+                                return const Center(
+                                  child: CircularProgressIndicator(color: AppColors.primary),
+                                );
+                              },
+                              errorBuilder: (_, _, _) => Center(
+                                child: Icon(Icons.broken_image, color: AppColors.textSecondary, size: 40),
+                              ),
+                            ),
                           ),
                         ),
-                        child: const Text('Register', style: TextStyle(fontWeight: FontWeight.bold)),
-                      ),
+                        const SizedBox(height: AppPaddings.md),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: AppColors.success),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: const Text(
+                            'Upcoming',
+                            style: TextStyle(color: AppColors.success, fontSize: 12),
+                          ),
+                        ),
+                        const SizedBox(height: AppPaddings.md),
+                        Text(
+                          'Study Session',
+                          style: AppTextStyles.headline.copyWith(fontSize: 28),
+                        ),
+                        const SizedBox(height: AppPaddings.lg),
+                        _buildInfoRow(Icons.calendar_today, 'Date & Time', 'Apr 12, 2026 | 14:00'),
+                        _buildInfoRow(Icons.location_on, 'Location', 'Information Center, Room 204'),
+                        _buildInfoRow(Icons.person, 'Organizer', 'Name Surname'),
+                        _buildInfoRow(Icons.groups, 'Attendees', '8/20 registered'),
+                        const SizedBox(height: AppPaddings.lg),
+                        Text(
+                          'About this Event',
+                          style: AppTextStyles.body.copyWith(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: AppPaddings.sm),
+                        Text(
+                          'This text includes whatever the organizer wrote in the bio part. '
+                          '"Come join us for this event" - "I need some help prepping for an exam" '
+                          '- "I want some company/meet new people"',
+                          style: AppTextStyles.body.copyWith(height: 1.4),
+                        ),
+                        const SizedBox(height: AppPaddings.lg),
+                        Text(
+                          'Associated Tags',
+                          style: AppTextStyles.body.copyWith(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: AppPaddings.sm),
+                        Wrap(
+                          spacing: AppPaddings.sm,
+                          children: [
+                            _buildTag('Social'),
+                            _buildTag('Other'),
+                            _buildTag('Study'),
+                            _buildTag('Sports'),
+                          ],
+                        ),
+                        const SizedBox(height: AppPaddings.xl),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: () {},
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.primary,
+                                  foregroundColor: AppColors.onPrimary,
+                                  padding: const EdgeInsets.symmetric(vertical: AppPaddings.md),
+                                  shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                                ),
+                                child: const Text('Register', style: TextStyle(fontWeight: FontWeight.bold)),
+                              ),
+                            ),
+                            const SizedBox(width: AppPaddings.sm + 4),
+                            Container(
+                              decoration: const BoxDecoration(color: AppColors.primary),
+                              child: IconButton(
+                                icon: const Icon(Icons.chat_bubble_outline, color: AppColors.onPrimary),
+                                onPressed: () {
+                                  Navigator.pushNamed(context, AppRoutes.eventChat);
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 12),
-                    Container( // wrapping the icon in a box to style it
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: IconButton(
-                        icon: const Icon(Icons.chat_bubble_outline, color: Colors.black),
-                        onPressed: () {}, // empty button for the chat
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ],
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String label, String value) { // reusable row for the icons and text
+  Widget _buildInfoRow(IconData icon, String label, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
+      padding: const EdgeInsets.only(bottom: AppPaddings.md),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 20, color: Colors.black54), // the little icon on the left
-          const SizedBox(width: 12),
-          Column( // stacking the label on top of the actual info
+          Icon(icon, size: 20, color: AppColors.textSecondary),
+          const SizedBox(width: AppPaddings.sm + 4),
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: const TextStyle(fontSize: 12, color: Colors.black54)), // small grey label
-              Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)), // actual info text
+              Text(label, style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+              Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.textPrimary)),
             ],
           ),
         ],
@@ -137,14 +166,14 @@ class EventDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTag(String label) { // reusable widget for those pill shaped tags
+  Widget _buildTag(String label) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.black45),
+        border: Border.all(color: AppColors.border),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Text(label, style: const TextStyle(fontSize: 12)),
+      child: Text(label, style: const TextStyle(fontSize: 12, color: AppColors.textPrimary)),
     );
   }
 }

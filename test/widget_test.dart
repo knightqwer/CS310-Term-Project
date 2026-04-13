@@ -4,9 +4,10 @@ import 'package:quizradar/main.dart';
 
 void main() {
   testWidgets('App renders login screen', (WidgetTester tester) async {
-    await tester.pumpWidget(const QuizRadarApp());
+    await tester.pumpWidget(const GatherUpApp());
+    await tester.pumpAndSettle();
 
-    expect(find.text('QuizRadar'), findsOneWidget);
-    expect(find.text('Log In'), findsOneWidget);
+    expect(find.text('GatherUp'), findsOneWidget);
+    expect(find.text('Login'), findsOneWidget);
   });
 }
