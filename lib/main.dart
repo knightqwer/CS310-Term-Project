@@ -16,9 +16,15 @@ import 'screens/notifications_screen.dart';
 import 'screens/settings_screen.dart';
 import 'utils/app_colors.dart';
 import 'utils/app_routes.dart';
+import 'package:firebase_core/firebase_core.dart'; // to use the firebase core plugin
+import 'firebase_options.dart'; // the firebase configuration file
 
-void main()
-{
+void main() async { // make the main function asynchronous
+  // initialize firebase
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const GatherUpApp());
 }
 
