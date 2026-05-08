@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart';
+import '../providers/auth_provider.dart';
 import '../utils/app_colors.dart';
 import '../utils/app_paddings.dart';
 import '../utils/app_routes.dart';
 import '../utils/app_strings.dart';
 import '../utils/app_text_styles.dart';
+import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
+
+// this is the login screen
+// it only handles ui and calls authprovider for the actual firebase work
+// no firebase calls happen directly here everything goes through authprovider
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -14,50 +20,66 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final authService = AuthService();
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
+  // controllers to read what the user typed in the fields
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  // _errormessage holds whatever error firebase gave us so we can show it in the ui
+  String? _errorMessage;
+
+  // obscurepassword toggles whether the password field shows dots or plain text
   bool obscurePassword = true;
-  bool isLoading = false;
 
-  @override
-  void dispose() {
-    emailController.dispose();
-    passwordController.dispose();
-    super.dispose();
-  }
+  // _isloading shows a spinner while firebase is doing its thing
+  bool _isLoading = false;
 
-  void handleLogin() async {
-    if (emailController.text.isEmpty || passwordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields')),
-      );
-      return;
-    }
-
-    setState(() => isLoading = true);
+  void _handleLogin() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
 
     try {
-      await authService.signIn(
-        emailController.text,
-        passwordController.text,
+      // we grab authprovider from the multiprovider tree
+      // listen false because we dont need this widget to rebuild when authprovider changes
+      // the authgate handles navigation so we dont push any routes here
+      await Provider.of<AuthProvider>(context, listen: false)
+          .signInWithEmail(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
       );
-      if (mounted) {
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          AppRoutes.home,
-          (route) => false,
-        );
-      }
-    } on Exception catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
-        );
-      }
+      // authgate handles navigation automatically after login
+    } on FirebaseAuthException catch (e) {
+      // map firebase error codes to friendly messages for the user
+      setState(() {
+        switch (e.code) {
+          case 'invalid-credential':
+          // newer firebase merges wrong-password and user-not-found into this
+          // which is good because it prevents email enumeration
+            _errorMessage = 'Invalid email or password';
+            break;
+          case 'user-disabled':
+            _errorMessage = 'This account has been disabled';
+            break;
+          case 'too-many-requests':
+            _errorMessage = 'Too many attempts, try again later';
+            break;
+          default:
+            _errorMessage = e.message ?? 'An error occurred';
+        }
+      });
     } finally {
-      if (mounted) setState(() => isLoading = false);
+      // always stop the loading spinner whether it worked or not
+      setState(() => _isLoading = false);
     }
+  }
+
+  // always dispose controllers when the widget is removed to avoid memory leaks
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
   @override
@@ -85,14 +107,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       'assets/images/logo.png',
                       width: 64,
                       height: 64,
-                      errorBuilder: (_, _, _) => const Icon(Icons.event, size: 64, color: AppColors.primary),
+                      errorBuilder: (context, error, stackTrace) => const Icon(Icons.event, size: 64, color: AppColors.primary),
                     ),
                     const SizedBox(height: AppPaddings.md),
                     Text(AppStrings.appName, style: AppTextStyles.headline),
                     Text(AppStrings.loginSubtitle, style: AppTextStyles.subtitle),
                     const SizedBox(height: AppPaddings.xl),
                     TextField(
-                      controller: emailController,
+                      controller: _emailController,
                       style: const TextStyle(color: AppColors.textPrimary),
                       decoration: InputDecoration(
                         hintText: 'Email',
@@ -104,7 +126,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: AppPaddings.md),
                     TextField(
-                      controller: passwordController,
+                      controller: _passwordController,
                       obscureText: obscurePassword,
                       style: const TextStyle(color: AppColors.textPrimary),
                       decoration: InputDecoration(
@@ -113,12 +135,23 @@ class _LoginScreenState extends State<LoginScreen> {
                         filled: true,
                         fillColor: AppColors.background,
                         border: const OutlineInputBorder(borderRadius: BorderRadius.zero),
+                        // toggle button to show or hide the password
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            obscurePassword ? Icons.visibility_off : Icons.visibility,
+                            color: AppColors.textSecondary,
+                          ),
+                          onPressed: () => setState(() => obscurePassword = !obscurePassword),
+                        ),
                       ),
                     ),
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
                         onPressed: () {
+                          // this goes to the forgot password screen
+                          // that screen is owned by the state mgmt guy
+                          // it will call authprovider.sendpasswordresetemail
                           Navigator.pushNamed(context, AppRoutes.forgotPassword);
                         },
                         child: Text(
@@ -128,14 +161,24 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     const SizedBox(height: AppPaddings.md),
-                    if (isLoading)
+                    // show error message if there is one
+                    if (_errorMessage != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: AppPaddings.sm),
+                        child: Text(
+                          _errorMessage!,
+                          style: const TextStyle(color: AppColors.error),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    if (_isLoading)
                       const CircularProgressIndicator()
                     else
                       SizedBox(
                         width: double.infinity,
                         height: 48,
                         child: ElevatedButton(
-                          onPressed: handleLogin,
+                          onPressed: _handleLogin,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primary,
                             foregroundColor: AppColors.onPrimary,
