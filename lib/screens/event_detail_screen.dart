@@ -13,7 +13,7 @@ class EventDetailScreen extends StatelessWidget {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text('Event Details', style: AppTextStyles.title),
@@ -48,7 +48,7 @@ class EventDetailScreen extends StatelessWidget {
                               fit: BoxFit.contain,
                               loadingBuilder: (context, child, progress) {
                                 if (progress == null) return child;
-                                return const Center(
+                                return Center(
                                   child: CircularProgressIndicator(color: AppColors.primary),
                                 );
                               },
@@ -65,7 +65,7 @@ class EventDetailScreen extends StatelessWidget {
                             border: Border.all(color: AppColors.success),
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          child: const Text(
+                          child: Text(
                             'Upcoming',
                             style: TextStyle(color: AppColors.success, fontSize: 12),
                           ),
@@ -124,9 +124,9 @@ class EventDetailScreen extends StatelessWidget {
                             ),
                             const SizedBox(width: AppPaddings.sm + 4),
                             Container(
-                              decoration: const BoxDecoration(color: AppColors.primary),
+                              decoration: BoxDecoration(color: AppColors.primary),
                               child: IconButton(
-                                icon: const Icon(Icons.chat_bubble_outline, color: AppColors.onPrimary),
+                                icon: Icon(Icons.chat_bubble_outline, color: AppColors.onPrimary),
                                 onPressed: () {
                                   Navigator.pushNamed(context, AppRoutes.eventChat);
                                 },
@@ -158,7 +158,7 @@ class EventDetailScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(label, style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-              Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.textPrimary)),
+              Text(value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.textPrimary)),
             ],
           ),
         ],
@@ -173,7 +173,7 @@ class EventDetailScreen extends StatelessWidget {
         border: Border.all(color: AppColors.border),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Text(label, style: const TextStyle(fontSize: 12, color: AppColors.textPrimary)),
+      child: Text(label, style: TextStyle(fontSize: 12, color: AppColors.textPrimary)),
     );
   }
 }

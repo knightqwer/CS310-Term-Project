@@ -66,7 +66,7 @@ class _EventChatScreenState extends State<EventChatScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Column(
@@ -100,7 +100,7 @@ class _EventChatScreenState extends State<EventChatScreen> {
                   Expanded(
                     child: TextField(
                       controller: messageController,
-                      style: const TextStyle(color: AppColors.textPrimary),
+                      style: TextStyle(color: AppColors.textPrimary),
                       textInputAction: TextInputAction.send,
                       onSubmitted: (_) => handleSend(),
                       decoration: InputDecoration(
@@ -113,7 +113,7 @@ class _EventChatScreenState extends State<EventChatScreen> {
                           borderRadius: BorderRadius.zero,
                           borderSide: BorderSide(color: AppColors.border),
                         ),
-                        focusedBorder: const OutlineInputBorder(
+                        focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.zero,
                           borderSide: BorderSide(color: AppColors.primary),
                         ),
@@ -122,12 +122,12 @@ class _EventChatScreenState extends State<EventChatScreen> {
                   ),
                   const SizedBox(width: AppPaddings.sm),
                   Container(
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       color: AppColors.primary,
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.send, color: AppColors.onPrimary),
+                      icon: Icon(Icons.send, color: AppColors.onPrimary),
                       onPressed: handleSend,
                     ),
                   ),
@@ -161,7 +161,7 @@ class _EventChatScreenState extends State<EventChatScreen> {
                 color: AppColors.surface,
                 border: Border.all(color: AppColors.border),
               ),
-              child: const Icon(Icons.person, color: AppColors.textPrimary, size: 20),
+              child: Icon(Icons.person, color: AppColors.textPrimary, size: 20),
             ),
           Flexible(
             child: Align(

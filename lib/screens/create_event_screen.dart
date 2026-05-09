@@ -57,7 +57,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       builder: (context, child) {
         return Theme(
           data: ThemeData.dark().copyWith(
-            colorScheme: const ColorScheme.dark(
+            colorScheme: ColorScheme.dark(
               primary: AppColors.primary,
               onPrimary: AppColors.onPrimary,
               surface: AppColors.surface,
@@ -80,7 +80,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       builder: (context, child) {
         return Theme(
           data: ThemeData.dark().copyWith(
-            colorScheme: const ColorScheme.dark(
+            colorScheme: ColorScheme.dark(
               primary: AppColors.primary,
               onPrimary: AppColors.onPrimary,
               surface: AppColors.surface,
@@ -124,7 +124,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         borderRadius: BorderRadius.zero,
         borderSide: BorderSide(color: AppColors.border),
       ),
-      focusedBorder: const OutlineInputBorder(
+      focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.zero,
         borderSide: BorderSide(color: AppColors.primary),
       ),
@@ -137,7 +137,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text('Create an Event', style: AppTextStyles.title),
@@ -160,13 +160,13 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                     const SizedBox(height: AppPaddings.lg),
                     TextField(
                       controller: titleController,
-                      style: const TextStyle(color: AppColors.textPrimary),
+                      style: TextStyle(color: AppColors.textPrimary),
                       decoration: _inputDecoration('Event Title'),
                     ),
                     const SizedBox(height: AppPaddings.md),
                     TextField(
                       controller: descriptionController,
-                      style: const TextStyle(color: AppColors.textPrimary),
+                      style: TextStyle(color: AppColors.textPrimary),
                       maxLines: 3,
                       decoration: _inputDecoration('Description'),
                     ),
@@ -174,7 +174,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                     DropdownButtonFormField<String>(
                       initialValue: selectedCategory,
                       dropdownColor: AppColors.surface,
-                      style: const TextStyle(color: AppColors.textPrimary),
+                      style: TextStyle(color: AppColors.textPrimary),
                       decoration: _inputDecoration('Category'),
                       icon: Icon(Icons.keyboard_arrow_down, color: AppColors.textSecondary),
                       items: categories.map((cat) {
@@ -238,7 +238,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                     DropdownButtonFormField<String>(
                       initialValue: selectedLocation,
                       dropdownColor: AppColors.surface,
-                      style: const TextStyle(color: AppColors.textPrimary),
+                      style: TextStyle(color: AppColors.textPrimary),
                       decoration: _inputDecoration('Location'),
                       icon: Icon(Icons.keyboard_arrow_down, color: AppColors.textSecondary),
                       items: locations.map((loc) {
@@ -249,7 +249,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                     const SizedBox(height: AppPaddings.md),
                     TextField(
                       controller: capacityController,
-                      style: const TextStyle(color: AppColors.textPrimary),
+                      style: TextStyle(color: AppColors.textPrimary),
                       keyboardType: TextInputType.number,
                       decoration: _inputDecoration('Capacity'),
                     ),

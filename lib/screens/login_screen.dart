@@ -85,7 +85,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       'assets/images/logo.png',
                       width: 64,
                       height: 64,
-                      errorBuilder: (_, _, _) => const Icon(Icons.event, size: 64, color: AppColors.primary),
+                      errorBuilder: (_, _, _) => Icon(Icons.event, size: 64, color: AppColors.primary),
                     ),
                     const SizedBox(height: AppPaddings.md),
                     Text(AppStrings.appName, style: AppTextStyles.headline),
@@ -93,7 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: AppPaddings.xl),
                     TextField(
                       controller: emailController,
-                      style: const TextStyle(color: AppColors.textPrimary),
+                      style: TextStyle(color: AppColors.textPrimary),
                       decoration: InputDecoration(
                         hintText: 'Email',
                         hintStyle: TextStyle(color: AppColors.textHint),
@@ -106,7 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     TextField(
                       controller: passwordController,
                       obscureText: obscurePassword,
-                      style: const TextStyle(color: AppColors.textPrimary),
+                      style: TextStyle(color: AppColors.textPrimary),
                       decoration: InputDecoration(
                         hintText: 'Password',
                         hintStyle: TextStyle(color: AppColors.textHint),
@@ -156,7 +156,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           onTap: () {
                             Navigator.pushNamed(context, AppRoutes.signup);
                           },
-                          child: const Text(
+                          child: Text(
                             'Sign Up',
                             style: TextStyle(
                               color: AppColors.textPrimary,

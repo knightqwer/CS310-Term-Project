@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/login_screen.dart';
 import 'screens/signup_screen.dart';
 import 'screens/forgot_password_screen.dart';
@@ -16,16 +18,24 @@ import 'screens/notifications_screen.dart';
 import 'screens/settings_screen.dart';
 import 'utils/app_colors.dart';
 import 'utils/app_routes.dart';
-import 'package:firebase_core/firebase_core.dart'; // to use the firebase core plugin
-import 'firebase_options.dart'; // the firebase configuration file
+import 'providers/theme_provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() async { // make the main function asynchronous
-  // initialize firebase
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const GatherUpApp());
+  final prefs = await SharedPreferences.getInstance();
+  final themeProvider = ThemeProvider(prefs);
+
+  runApp(
+    ChangeNotifierProvider<ThemeProvider>.value(
+      value: themeProvider,
+      child: const GatherUpApp(),
+    ),
+  );
 }
 
 class GatherUpApp extends StatelessWidget {
@@ -33,25 +43,15 @@ class GatherUpApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+    AppColors.update(themeProvider.isDarkMode);
+
     return MaterialApp(
       title: 'GatherUp',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: AppColors.background,
-        textTheme: GoogleFonts.poppinsTextTheme(
-          ThemeData.dark().textTheme,
-        ),
-        appBarTheme: AppBarTheme(
-          backgroundColor: AppColors.background,
-          elevation: 0,
-          titleTextStyle: GoogleFonts.poppins(
-            color: AppColors.textPrimary,
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
+      theme: _buildTheme(Brightness.light),
+      darkTheme: _buildTheme(Brightness.dark),
+      themeMode: themeProvider.themeMode,
       initialRoute: AppRoutes.login,
       routes: {
         AppRoutes.login: (_) => const LoginScreen(),
@@ -69,6 +69,26 @@ class GatherUpApp extends StatelessWidget {
         AppRoutes.notifications: (_) => const NotificationsScreen(),
         AppRoutes.settings: (_) => const SettingsScreen(),
       },
+    );
+  }
+
+  ThemeData _buildTheme(Brightness brightness) {
+    final isDark = brightness == Brightness.dark;
+    return ThemeData(
+      brightness: brightness,
+      scaffoldBackgroundColor: AppColors.background,
+      textTheme: GoogleFonts.poppinsTextTheme(
+        isDark ? ThemeData.dark().textTheme : ThemeData.light().textTheme,
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: AppColors.background,
+        elevation: 0,
+        titleTextStyle: GoogleFonts.poppins(
+          color: AppColors.textPrimary,
+          fontSize: 22,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
     );
   }
 }

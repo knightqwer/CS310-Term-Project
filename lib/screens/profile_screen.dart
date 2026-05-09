@@ -17,7 +17,7 @@ class ProfileScreen extends StatelessWidget {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text('Profile', style: AppTextStyles.title),
@@ -48,7 +48,7 @@ class ProfileScreen extends StatelessWidget {
                             child: Image.asset(
                               'assets/images/logo.png',
                               fit: BoxFit.cover,
-                              errorBuilder: (_, _, _) => const Icon(
+                              errorBuilder: (_, _, _) => Icon(
                                 Icons.person,
                                 color: AppColors.textPrimary,
                                 size: 60,

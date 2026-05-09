@@ -20,7 +20,7 @@ class HomeScreen extends StatelessWidget {
               'assets/images/logo.png',
               width: 28,
               height: 28,
-              errorBuilder: (_, _, _) => const Icon(Icons.event, size: 28, color: AppColors.primary),
+              errorBuilder: (_, _, _) => Icon(Icons.event, size: 28, color: AppColors.primary),
             ),
             const SizedBox(width: AppPaddings.sm),
             Text(AppStrings.appName, style: AppTextStyles.title),

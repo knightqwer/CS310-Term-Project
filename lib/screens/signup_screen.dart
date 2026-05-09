@@ -72,10 +72,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: const Text('Account Created', style: TextStyle(color: AppColors.textPrimary)),
+        title: Text('Account Created', style: TextStyle(color: AppColors.textPrimary)),
         content: Text(
           'Welcome to ${AppStrings.appName}, ${_nameController.text.trim()}!',
-          style: const TextStyle(color: AppColors.textPrimary),
+          style: TextStyle(color: AppColors.textPrimary),
         ),
         actions: [
           TextButton(
@@ -83,7 +83,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               Navigator.pop(ctx);
               Navigator.pushNamedAndRemoveUntil(context, AppRoutes.home, (_) => false);
             },
-            child: const Text('Continue', style: TextStyle(color: AppColors.primary)),
+            child: Text('Continue', style: TextStyle(color: AppColors.primary)),
           ),
         ],
       ),
@@ -98,7 +98,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -150,7 +150,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           Text('Already have an account? ', style: TextStyle(color: AppColors.textSecondary)),
                           GestureDetector(
                             onTap: () => Navigator.pop(context),
-                            child: const Text(
+                            child: Text(
                               'Log in',
                               style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                             ),
@@ -180,7 +180,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         controller: controller,
         obscureText: obscureText,
         validator: validator,
-        style: const TextStyle(color: AppColors.textPrimary),
+        style: TextStyle(color: AppColors.textPrimary),
         decoration: InputDecoration(
           labelText: label,
           labelStyle: TextStyle(color: AppColors.textSecondary),
@@ -190,7 +190,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             borderRadius: BorderRadius.zero,
             borderSide: BorderSide(color: AppColors.border),
           ),
-          focusedBorder: const OutlineInputBorder(
+          focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.zero,
             borderSide: BorderSide(color: AppColors.primary),
           ),

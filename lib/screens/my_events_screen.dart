@@ -89,7 +89,7 @@ class _MyEventsScreenState extends State<MyEventsScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.event_busy, size: 64, color: AppColors.primary),
+          Icon(Icons.event_busy, size: 64, color: AppColors.primary),
           const SizedBox(height: AppPaddings.md),
           Text('No Events Yet', style: AppTextStyles.title),
         ],
@@ -120,7 +120,7 @@ class _MyEventsScreenState extends State<MyEventsScreen>
               child: Image.asset(
                 'assets/images/logo.png',
                 fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => const Icon(Icons.event, color: AppColors.primary),
+                errorBuilder: (_, _, _) => Icon(Icons.event, color: AppColors.primary),
               ),
             ),
             const SizedBox(width: AppPaddings.md),
@@ -174,7 +174,7 @@ class _MyEventsScreenState extends State<MyEventsScreen>
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.delete_outline, color: AppColors.error),
+              icon: Icon(Icons.delete_outline, color: AppColors.error),
               onPressed: () => removeEvent(source, event),
               tooltip: 'Remove',
             ),
@@ -205,7 +205,7 @@ class _MyEventsScreenState extends State<MyEventsScreen>
       backgroundColor: AppColors.background,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text('My Events', style: AppTextStyles.title),
@@ -227,7 +227,7 @@ class _MyEventsScreenState extends State<MyEventsScreen>
             padding: const EdgeInsets.all(AppPaddings.md),
             child: TextField(
               controller: searchController,
-              style: const TextStyle(color: AppColors.textPrimary),
+              style: TextStyle(color: AppColors.textPrimary),
               decoration: InputDecoration(
                 hintText: AppStrings.searchHint,
                 hintStyle: TextStyle(color: AppColors.textHint),
@@ -236,7 +236,7 @@ class _MyEventsScreenState extends State<MyEventsScreen>
                   borderRadius: BorderRadius.zero,
                   borderSide: BorderSide(color: AppColors.border),
                 ),
-                focusedBorder: const OutlineInputBorder(
+                focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.zero,
                   borderSide: BorderSide(color: AppColors.primary),
                 ),
