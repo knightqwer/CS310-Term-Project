@@ -1,7 +1,6 @@
 # Environment
 .env
 .vscode/
-.claude/
 # Firebase
 lib/firebase_options.dart
 android/app/google-services.json
