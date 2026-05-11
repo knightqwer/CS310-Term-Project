@@ -61,7 +61,6 @@ class GatherUpApp extends StatelessWidget {
         AppRoutes.home: (_) => const HomeScreen(),
         AppRoutes.myEvents: (_) => const MyEventsScreen(),
         AppRoutes.createEvent: (_) => const CreateEventScreen(),
-        AppRoutes.eventChat: (_) => const EventChatScreen(),
         AppRoutes.profile: (_) => const ProfileScreen(),
         AppRoutes.editProfile: (_) => const EditProfileScreen(),
         AppRoutes.reportProfile: (_) => const ReportProfileScreen(),
@@ -69,32 +68,24 @@ class GatherUpApp extends StatelessWidget {
         AppRoutes.notifications: (_) => const NotificationsScreen(),
         AppRoutes.settings: (_) => const SettingsScreen(),
       },
-      // EventDetailScreen needs an Event argument — handled here
+      // Screens that require an Event argument are wired here
       onGenerateRoute: (settings) {
-        if (settings.name == AppRoutes.eventDetail) {
-          final event = settings.arguments is Event
-              ? settings.arguments as Event
-              : _placeholderEvent();
+        if (settings.name == AppRoutes.eventDetail &&
+            settings.arguments is Event) {
           return MaterialPageRoute(
-            builder: (_) => EventDetailScreen(event: event),
+            builder: (_) => EventDetailScreen(event: settings.arguments as Event),
+            settings: settings,
+          );
+        }
+        if (settings.name == AppRoutes.eventChat &&
+            settings.arguments is Event) {
+          return MaterialPageRoute(
+            builder: (_) => EventChatScreen(event: settings.arguments as Event),
             settings: settings,
           );
         }
         return null;
       },
-    );
-  }
-
-  // Fallback used when navigating to eventDetail without an Event argument
-  // (e.g., from the HomeScreen quick-action grid during development)
-  Event _placeholderEvent() {
-    return const Event(
-      id: 'placeholder',
-      title: 'Event Detail Preview',
-      status: 'upcoming',
-      location: 'TBD',
-      organizer: 'Organizer',
-      description: 'Navigate here from the Event Feed with a real Event object.',
     );
   }
 

@@ -11,6 +11,7 @@ Created when a user registers. The `uid` matches the Firebase Auth UID.
 | `displayName` | `String` | User's full name |
 | `email` | `String` | User's email address |
 | `bio` | `String` | Short profile bio |
+| `photoURL` | `String` | URL of the user's avatar image (empty string when unset) |
 | `attendingCount` | `int` | Number of events the user is currently registered for |
 | `eventsCreated` | `int` | Total number of events the user has created |
 

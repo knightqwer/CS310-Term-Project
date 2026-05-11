@@ -26,6 +26,7 @@ class AuthService {
       displayName: name,
       email: email,
       bio: '',
+      photoURL: '',
       attendingCount: 0,
       eventsCreated: 0,
     );

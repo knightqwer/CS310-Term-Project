@@ -219,9 +219,16 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                 decoration: BoxDecoration(color: AppColors.primary),
                                 child: IconButton(
                                   icon: Icon(Icons.chat_bubble_outline, color: AppColors.onPrimary),
-                                  onPressed: () {
-                                    Navigator.pushNamed(context, AppRoutes.eventChat);
-                                  },
+                                  onPressed: _isRegistered
+                                      ? () => Navigator.pushNamed(
+                                            context,
+                                            AppRoutes.eventChat,
+                                            arguments: widget.event,
+                                          )
+                                      : null,
+                                  tooltip: _isRegistered
+                                      ? 'Open chat'
+                                      : 'Register to open chat',
                                 ),
                               ),
                             ],

@@ -5,6 +5,7 @@ class AppUser {
   final String displayName;
   final String email;
   final String bio;
+  final String photoURL;
   final int attendingCount;
   final int eventsCreated;
 
@@ -13,6 +14,7 @@ class AppUser {
     required this.displayName,
     required this.email,
     required this.bio,
+    this.photoURL = '',
     required this.attendingCount,
     required this.eventsCreated,
   });
@@ -24,6 +26,7 @@ class AppUser {
       displayName: data['displayName'] as String? ?? '',
       email: data['email'] as String? ?? '',
       bio: data['bio'] as String? ?? '',
+      photoURL: data['photoURL'] as String? ?? '',
       attendingCount: (data['attendingCount'] as int?) ?? 0,
       eventsCreated: (data['eventsCreated'] as int?) ?? 0,
     );
@@ -34,6 +37,7 @@ class AppUser {
       'displayName': displayName,
       'email': email,
       'bio': bio,
+      'photoURL': photoURL,
       'attendingCount': attendingCount,
       'eventsCreated': eventsCreated,
     };
@@ -42,6 +46,7 @@ class AppUser {
   AppUser copyWith({
     String? displayName,
     String? bio,
+    String? photoURL,
     int? attendingCount,
     int? eventsCreated,
   }) {
@@ -50,6 +55,7 @@ class AppUser {
       displayName: displayName ?? this.displayName,
       email: email,
       bio: bio ?? this.bio,
+      photoURL: photoURL ?? this.photoURL,
       attendingCount: attendingCount ?? this.attendingCount,
       eventsCreated: eventsCreated ?? this.eventsCreated,
     );

@@ -59,10 +59,8 @@ class HomeScreen extends StatelessWidget {
     final items = [
       _QuickAction(icon: Icons.calendar_today, label: 'My Events', route: AppRoutes.myEvents),
       _QuickAction(icon: Icons.add_circle_outline, label: 'Create Event', route: AppRoutes.createEvent),
-      _QuickAction(icon: Icons.event_note, label: 'Event Detail', route: AppRoutes.eventDetail),
-      _QuickAction(icon: Icons.chat_bubble_outline, label: 'Event Chat', route: AppRoutes.eventChat),
       _QuickAction(icon: Icons.person, label: 'Profile', route: AppRoutes.profile),
-      _QuickAction(icon: Icons.edit, label: 'Edit Profile', route: AppRoutes.editProfile),
+      _QuickAction(icon: Icons.notifications_outlined, label: 'Notifications', route: AppRoutes.notifications),
     ];
 
     return GridView.count(
