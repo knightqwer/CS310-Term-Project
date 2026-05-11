@@ -1,8 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/notification_item.dart';
+import '../services/user_service.dart';
 import '../utils/app_colors.dart';
 import '../utils/app_paddings.dart';
 import '../utils/app_text_styles.dart';
@@ -28,13 +28,8 @@ class NotificationsScreen extends StatelessWidget {
   }
 
   Widget _stream(String uid) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('users')
-          .doc(uid)
-          .collection('notifications')
-          .orderBy('createdAt', descending: true)
-          .snapshots(),
+    return StreamBuilder<List<NotificationItem>>(
+      stream: UserService().notificationsStream(uid),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -44,14 +39,13 @@ class NotificationsScreen extends StatelessWidget {
             child: Text('Failed to load notifications', style: AppTextStyles.bodySecondary),
           );
         }
-        final docs = snapshot.data?.docs ?? [];
-        if (docs.isEmpty) return _emptyState();
+        final items = snapshot.data ?? const <NotificationItem>[];
+        if (items.isEmpty) return _emptyState();
 
-        final items = docs.map(NotificationItem.fromFirestore).toList();
         return ListView.separated(
           padding: const EdgeInsets.all(AppPaddings.md),
           itemCount: items.length,
-          separatorBuilder: (_, __) => const SizedBox(height: AppPaddings.sm),
+          separatorBuilder: (_, _) => const SizedBox(height: AppPaddings.sm),
           itemBuilder: (_, i) => _tile(items[i]),
         );
       },

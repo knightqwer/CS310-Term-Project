@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../models/event.dart';
+import '../services/event_service.dart';
+import '../services/user_service.dart';
 import '../utils/app_colors.dart';
 import '../utils/app_paddings.dart';
 import '../utils/app_text_styles.dart';
@@ -14,6 +16,8 @@ class CreateEventScreen extends StatefulWidget {
 }
 
 class _CreateEventScreenState extends State<CreateEventScreen> {
+  final _eventService = EventService();
+  final _userService = UserService();
   final titleController = TextEditingController();
   final descriptionController = TextEditingController();
   final capacityController = TextEditingController();
@@ -141,10 +145,8 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         selectedTime!.minute,
       );
 
-      final eventRef = FirebaseFirestore.instance.collection('events').doc();
-
       final event = Event(
-        id: eventRef.id,
+        id: '',
         title: titleController.text.trim(),
         imageUrl: '',
         status: 'upcoming',
@@ -156,19 +158,16 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         maxAttendees: maxAttendees,
         description: descriptionController.text.trim(),
         category: selectedCategory!,
-        tags: [],
-        attendeeUids: [],
+        tags: const [],
+        attendeeUids: const [],
         createdBy: user.uid,
         createdAt: DateTime.now(),
       );
 
-      await eventRef.set(event.toMap());
-
-      // Increment eventsCreated counter for the organizer
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .update({'eventsCreated': FieldValue.increment(1)});
+      await _eventService.createEvent(event.toMap());
+      await _userService.updateUser(user.uid, {
+        'eventsCreated': FieldValue.increment(1),
+      });
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

@@ -1,7 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../models/event.dart';
+import '../services/event_service.dart';
 import '../utils/app_colors.dart';
 import '../utils/app_paddings.dart';
 import '../utils/app_routes.dart';
@@ -17,8 +17,9 @@ class EventDetailScreen extends StatefulWidget {
 }
 
 class _EventDetailScreenState extends State<EventDetailScreen> {
+  final _eventService = EventService();
   bool _isRegistering = false;
-  bool? _locallyRegistered; // overrides widget.event after user registers
+  bool? _locallyRegistered;
 
   bool get _isRegistered {
     if (_locallyRegistered != null) return _locallyRegistered!;
@@ -26,7 +27,12 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     return uid != null && widget.event.attendeeUids.contains(uid);
   }
 
-  bool get _isFull => widget.event.attendeeCount >= widget.event.maxAttendees && widget.event.maxAttendees > 0;
+  int get _attendeeCount =>
+      widget.event.attendeeUids.length + (_locallyRegistered == true ? 1 : 0);
+
+  bool get _isFull =>
+      widget.event.maxAttendees > 0 &&
+      _attendeeCount >= widget.event.maxAttendees;
 
   Future<void> _register() async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
@@ -34,16 +40,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
 
     setState(() => _isRegistering = true);
     try {
-      final ref = FirebaseFirestore.instance.collection('events').doc(widget.event.id);
-      await FirebaseFirestore.instance.runTransaction((tx) async {
-        final snap = await tx.get(ref);
-        final current = (snap.data()?['attendeeCount'] as int?) ?? 0;
-        final uids = List<String>.from(snap.data()?['attendeeUids'] as List? ?? []);
-        if (!uids.contains(uid)) {
-          uids.add(uid);
-          tx.update(ref, {'attendeeUids': uids, 'attendeeCount': current + 1});
-        }
-      });
+      await _eventService.registerForEvent(widget.event.id, uid);
       if (mounted) {
         setState(() => _locallyRegistered = true);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -155,8 +152,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                           Icons.groups,
                           'Attendees',
                           e.maxAttendees > 0
-                              ? '${e.attendeeCount}/${e.maxAttendees} registered'
-                              : '${e.attendeeCount} registered',
+                              ? '$_attendeeCount/${e.maxAttendees} registered'
+                              : '$_attendeeCount registered',
                         ),
                         const SizedBox(height: AppPaddings.lg),
                         Text(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/event.dart';
+import '../services/event_service.dart';
 import '../utils/app_colors.dart';
 import '../utils/app_paddings.dart';
 import '../utils/app_text_styles.dart';
@@ -20,23 +20,9 @@ class _EventHistoryScreenState extends State<EventHistoryScreen> {
   void initState() {
     super.initState();
     final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid != null) {
-      _pastEventsStream = FirebaseFirestore.instance
-          .collection('events')
-          .where('attendeeUids', arrayContains: uid)
-          .snapshots()
-          .map((snap) {
-        final now = DateTime.now();
-        final events = snap.docs
-            .map((doc) => Event.fromFirestore(doc))
-            .where((e) => e.dateTime != null && e.dateTime!.isBefore(now))
-            .toList()
-          ..sort((a, b) => b.dateTime!.compareTo(a.dateTime!));
-        return events;
-      });
-    } else {
-      _pastEventsStream = const Stream.empty();
-    }
+    _pastEventsStream = uid != null
+        ? EventService().pastAttendedByUser(uid)
+        : const Stream.empty();
   }
 
   @override
