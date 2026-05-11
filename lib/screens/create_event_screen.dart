@@ -1,4 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../models/event.dart';
+import '../services/event_service.dart';
+import '../services/user_service.dart';
 import '../utils/app_colors.dart';
 import '../utils/app_paddings.dart';
 import '../utils/app_text_styles.dart';
@@ -11,6 +16,8 @@ class CreateEventScreen extends StatefulWidget {
 }
 
 class _CreateEventScreenState extends State<CreateEventScreen> {
+  final _eventService = EventService();
+  final _userService = UserService();
   final titleController = TextEditingController();
   final descriptionController = TextEditingController();
   final capacityController = TextEditingController();
@@ -19,6 +26,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   String? selectedLocation;
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
+  bool _isPublishing = false;
 
   final List<String> categories = [
     'Academic',
@@ -57,7 +65,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       builder: (context, child) {
         return Theme(
           data: ThemeData.dark().copyWith(
-            colorScheme: const ColorScheme.dark(
+            colorScheme: ColorScheme.dark(
               primary: AppColors.primary,
               onPrimary: AppColors.onPrimary,
               surface: AppColors.surface,
@@ -80,7 +88,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       builder: (context, child) {
         return Theme(
           data: ThemeData.dark().copyWith(
-            colorScheme: const ColorScheme.dark(
+            colorScheme: ColorScheme.dark(
               primary: AppColors.primary,
               onPrimary: AppColors.onPrimary,
               surface: AppColors.surface,
@@ -96,24 +104,86 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     }
   }
 
-  void handlePublish() {
-    if (titleController.text.isEmpty ||
-        descriptionController.text.isEmpty ||
+  Future<void> handlePublish() async {
+    if (titleController.text.trim().isEmpty ||
+        descriptionController.text.trim().isEmpty ||
         selectedCategory == null ||
         selectedDate == null ||
         selectedTime == null ||
         selectedLocation == null ||
-        capacityController.text.isEmpty) {
+        capacityController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill in all fields')),
       );
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Event published successfully!')),
-    );
-    Navigator.pop(context);
+    final maxAttendees = int.tryParse(capacityController.text.trim());
+    if (maxAttendees == null || maxAttendees <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Capacity must be a positive number')),
+      );
+      return;
+    }
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('You must be logged in to create an event')),
+      );
+      return;
+    }
+
+    setState(() => _isPublishing = true);
+
+    try {
+      final combined = DateTime(
+        selectedDate!.year,
+        selectedDate!.month,
+        selectedDate!.day,
+        selectedTime!.hour,
+        selectedTime!.minute,
+      );
+
+      final event = Event(
+        id: '',
+        title: titleController.text.trim(),
+        imageUrl: '',
+        status: 'upcoming',
+        dateTime: combined,
+        location: selectedLocation!,
+        organizer: user.displayName ?? '',
+        organizerUid: user.uid,
+        attendeeCount: 0,
+        maxAttendees: maxAttendees,
+        description: descriptionController.text.trim(),
+        category: selectedCategory!,
+        tags: const [],
+        attendeeUids: const [],
+        createdBy: user.uid,
+        createdAt: DateTime.now(),
+      );
+
+      await _eventService.createEvent(event.toMap());
+      await _userService.updateUser(user.uid, {
+        'eventsCreated': FieldValue.increment(1),
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Event published successfully!')),
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to publish event: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isPublishing = false);
+    }
   }
 
   InputDecoration _inputDecoration(String label) {
@@ -124,7 +194,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         borderRadius: BorderRadius.zero,
         borderSide: BorderSide(color: AppColors.border),
       ),
-      focusedBorder: const OutlineInputBorder(
+      focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.zero,
         borderSide: BorderSide(color: AppColors.primary),
       ),
@@ -137,7 +207,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text('Create an Event', style: AppTextStyles.title),
@@ -160,21 +230,21 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                     const SizedBox(height: AppPaddings.lg),
                     TextField(
                       controller: titleController,
-                      style: const TextStyle(color: AppColors.textPrimary),
+                      style: TextStyle(color: AppColors.textPrimary),
                       decoration: _inputDecoration('Event Title'),
                     ),
                     const SizedBox(height: AppPaddings.md),
                     TextField(
                       controller: descriptionController,
-                      style: const TextStyle(color: AppColors.textPrimary),
+                      style: TextStyle(color: AppColors.textPrimary),
                       maxLines: 3,
                       decoration: _inputDecoration('Description'),
                     ),
                     const SizedBox(height: AppPaddings.md),
                     DropdownButtonFormField<String>(
-                      initialValue: selectedCategory,
+                      value: selectedCategory,
                       dropdownColor: AppColors.surface,
-                      style: const TextStyle(color: AppColors.textPrimary),
+                      style: TextStyle(color: AppColors.textPrimary),
                       decoration: _inputDecoration('Category'),
                       icon: Icon(Icons.keyboard_arrow_down, color: AppColors.textSecondary),
                       items: categories.map((cat) {
@@ -236,9 +306,9 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                     ),
                     const SizedBox(height: AppPaddings.md),
                     DropdownButtonFormField<String>(
-                      initialValue: selectedLocation,
+                      value: selectedLocation,
                       dropdownColor: AppColors.surface,
-                      style: const TextStyle(color: AppColors.textPrimary),
+                      style: TextStyle(color: AppColors.textPrimary),
                       decoration: _inputDecoration('Location'),
                       icon: Icon(Icons.keyboard_arrow_down, color: AppColors.textSecondary),
                       items: locations.map((loc) {
@@ -249,7 +319,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                     const SizedBox(height: AppPaddings.md),
                     TextField(
                       controller: capacityController,
-                      style: const TextStyle(color: AppColors.textPrimary),
+                      style: TextStyle(color: AppColors.textPrimary),
                       keyboardType: TextInputType.number,
                       decoration: _inputDecoration('Capacity'),
                     ),
@@ -258,13 +328,19 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                       width: double.infinity,
                       height: 48,
                       child: ElevatedButton(
-                        onPressed: handlePublish,
+                        onPressed: _isPublishing ? null : handlePublish,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           foregroundColor: AppColors.onPrimary,
                           shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
                         ),
-                        child: Text('Publish Event', style: AppTextStyles.button),
+                        child: _isPublishing
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                              )
+                            : Text('Publish Event', style: AppTextStyles.button),
                       ),
                     ),
                     const SizedBox(height: AppPaddings.lg),

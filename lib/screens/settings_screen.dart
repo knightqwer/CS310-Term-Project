@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/theme_provider.dart';
 import '../utils/app_colors.dart';
 import '../utils/app_paddings.dart';
 import '../utils/app_text_styles.dart';
@@ -12,7 +14,6 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   bool pushNotifications = true;
-  bool darkMode = true;
   bool locationSharing = false;
 
   @override
@@ -21,7 +22,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text('Settings', style: AppTextStyles.title),
@@ -46,8 +47,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                       _buildToggleTile(
                         label: 'Dark Mode',
-                        value: darkMode,
-                        onChanged: (v) => setState(() => darkMode = v),
+                        value: context.watch<ThemeProvider>().isDarkMode,
+                        onChanged: (v) => context.read<ThemeProvider>().setDarkMode(v),
                       ),
                       _buildToggleTile(
                         label: 'Location Sharing',
