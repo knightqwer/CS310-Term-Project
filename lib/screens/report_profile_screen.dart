@@ -72,7 +72,7 @@ class _ReportProfileScreenState extends State<ReportProfileScreen> {
         'reportedUsername': usernameController.text.trim(),
         'reason': _selectedReason,
         'details': detailsController.text.trim(),
-        'timestamp': FieldValue.serverTimestamp(),
+        'createdAt': FieldValue.serverTimestamp(),
       }).timeout(const Duration(seconds: 10));
     } catch (e) {
       if (mounted) {
