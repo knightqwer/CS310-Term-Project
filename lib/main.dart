@@ -1,27 +1,30 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'firebase_options.dart';
 import 'models/event.dart';
-import 'screens/login_screen.dart';
-import 'screens/signup_screen.dart';
-import 'screens/forgot_password_screen.dart';
-import 'screens/home_screen.dart';
-import 'screens/my_events_screen.dart';
+import 'providers/auth_provider.dart';
+import 'providers/theme_provider.dart';
 import 'screens/create_event_screen.dart';
-import 'screens/event_detail_screen.dart';
-import 'screens/event_chat_screen.dart';
-import 'screens/profile_screen.dart';
 import 'screens/edit_profile_screen.dart';
-import 'screens/report_profile_screen.dart';
+import 'screens/event_chat_screen.dart';
+import 'screens/event_detail_screen.dart';
+import 'screens/event_feed_screen.dart';
 import 'screens/event_history_screen.dart';
+import 'screens/forgot_password_screen.dart';
+import 'screens/login_screen.dart';
+import 'screens/my_events_screen.dart';
 import 'screens/notifications_screen.dart';
+import 'screens/profile_screen.dart';
+import 'screens/report_profile_screen.dart';
 import 'screens/settings_screen.dart';
+import 'screens/signup_screen.dart';
 import 'utils/app_colors.dart';
 import 'utils/app_routes.dart';
-import 'providers/theme_provider.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
+import 'widgets/auth_gate.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,8 +35,11 @@ void main() async {
   final themeProvider = ThemeProvider(prefs);
 
   runApp(
-    ChangeNotifierProvider<ThemeProvider>.value(
-      value: themeProvider,
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider<AuthProvider>(create: (_) => AuthProvider()),
+        ChangeNotifierProvider<ThemeProvider>.value(value: themeProvider),
+      ],
       child: const GatherUpApp(),
     ),
   );
@@ -53,12 +59,12 @@ class GatherUpApp extends StatelessWidget {
       theme: _buildTheme(Brightness.light),
       darkTheme: _buildTheme(Brightness.dark),
       themeMode: themeProvider.themeMode,
-      initialRoute: AppRoutes.login,
+      home: const AuthGate(),
       routes: {
         AppRoutes.login: (_) => const LoginScreen(),
         AppRoutes.signup: (_) => const SignUpScreen(),
         AppRoutes.forgotPassword: (_) => const ForgotPasswordScreen(),
-        AppRoutes.home: (_) => const HomeScreen(),
+        AppRoutes.home: (_) => const EventFeedScreen(),
         AppRoutes.myEvents: (_) => const MyEventsScreen(),
         AppRoutes.createEvent: (_) => const CreateEventScreen(),
         AppRoutes.profile: (_) => const ProfileScreen(),
@@ -68,19 +74,20 @@ class GatherUpApp extends StatelessWidget {
         AppRoutes.notifications: (_) => const NotificationsScreen(),
         AppRoutes.settings: (_) => const SettingsScreen(),
       },
-      // Screens that require an Event argument are wired here
       onGenerateRoute: (settings) {
         if (settings.name == AppRoutes.eventDetail &&
             settings.arguments is Event) {
           return MaterialPageRoute(
-            builder: (_) => EventDetailScreen(event: settings.arguments as Event),
+            builder: (_) =>
+                EventDetailScreen(event: settings.arguments as Event),
             settings: settings,
           );
         }
         if (settings.name == AppRoutes.eventChat &&
             settings.arguments is Event) {
           return MaterialPageRoute(
-            builder: (_) => EventChatScreen(event: settings.arguments as Event),
+            builder: (_) =>
+                EventChatScreen(event: settings.arguments as Event),
             settings: settings,
           );
         }
