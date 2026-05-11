@@ -11,6 +11,7 @@ Created when a user registers. The `uid` matches the Firebase Auth UID.
 | `displayName` | `String` | User's full name |
 | `email` | `String` | User's email address |
 | `bio` | `String` | Short profile bio |
+| `photoURL` | `String` | URL of the user's avatar image (empty string when unset) |
 | `attendingCount` | `int` | Number of events the user is currently registered for |
 | `eventsCreated` | `int` | Total number of events the user has created |
 
@@ -74,8 +75,9 @@ Top-level collection for user reports. `reportId` is auto-generated.
 | Field | Type | Description |
 |-------|------|-------------|
 | `reporterUid` | `String` | UID of the user who filed the report |
-| `reportedUid` | `String` | UID of the reported user |
-| `reason` | `String` | Reason text provided by the reporter |
+| `reportedUsername` | `String` | Username of the reported profile (as typed by the reporter) |
+| `reason` | `String` | Selected reason category (e.g. "Harassment or bullying") |
+| `details` | `String` | Free-text details provided by the reporter |
 | `createdAt` | `Timestamp` | When the report was submitted |
 
 ---

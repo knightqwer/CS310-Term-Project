@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Read(//c/src/**)",
-      "Bash(export PATH=\"$PATH:/c/Users/ismai/flutter/bin:/c/flutter/bin:/c/src/flutter/bin\")",
-      "Bash(flutter pub *)"
-    ]
-  }
-}

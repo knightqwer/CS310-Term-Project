@@ -1,7 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../models/event.dart';
+import '../services/event_service.dart';
 import '../utils/app_colors.dart';
 import '../utils/app_paddings.dart';
 import '../utils/app_routes.dart';
@@ -17,24 +17,18 @@ class MyEventsScreen extends StatefulWidget {
 
 class _MyEventsScreenState extends State<MyEventsScreen>
     with SingleTickerProviderStateMixin {
+  final _eventService = EventService();
   late TabController tabController;
   final searchController = TextEditingController();
 
   String get _uid => FirebaseAuth.instance.currentUser?.uid ?? '';
 
-  // Query 1: events the user is registered for (attendeeUids contains uid)
-  Stream<List<Event>> get _registeredStream => FirebaseFirestore.instance
-      .collection('events')
-      .where('attendeeUids', arrayContains: _uid)
-      .snapshots()
-      .map((snap) => snap.docs.map(Event.fromFirestore).toList());
+  Stream<List<Event>> get _registeredStream =>
+      _eventService.registeredByUser(_uid);
 
-  // Query 2: events the user created
-  Stream<List<Event>> get _createdStream => FirebaseFirestore.instance
-      .collection('events')
-      .where('createdBy', isEqualTo: _uid)
-      .snapshots()
-      .map((snap) => snap.docs.map(Event.fromFirestore).toList());
+  Stream<List<Event>> get _createdStream => _eventService.createdByUser(_uid);
+
+  Stream<List<Event>> get _pastStream => _eventService.pastAttendedByUser(_uid);
 
   @override
   void initState() {
@@ -162,7 +156,7 @@ class _MyEventsScreenState extends State<MyEventsScreen>
     );
   }
 
-  Widget _buildStreamTab(Stream<List<Event>> stream, {bool pastOnly = false, bool upcomingOnly = false}) {
+  Widget _buildStreamTab(Stream<List<Event>> stream, {bool upcomingOnly = false}) {
     return StreamBuilder<List<Event>>(
       stream: stream,
       builder: (context, snapshot) {
@@ -172,11 +166,9 @@ class _MyEventsScreenState extends State<MyEventsScreen>
         if (snapshot.hasError) {
           return Center(child: Text('Error loading events', style: AppTextStyles.body));
         }
-        final now = DateTime.now();
-        var events = snapshot.data ?? [];
-        if (pastOnly) {
-          events = events.where((e) => e.dateTime != null && e.dateTime!.isBefore(now)).toList();
-        } else if (upcomingOnly) {
+        var events = snapshot.data ?? const <Event>[];
+        if (upcomingOnly) {
+          final now = DateTime.now();
           events = events.where((e) => e.dateTime == null || e.dateTime!.isAfter(now)).toList();
         }
         return _buildEventList(events);
@@ -234,12 +226,9 @@ class _MyEventsScreenState extends State<MyEventsScreen>
             child: TabBarView(
               controller: tabController,
               children: [
-                // Tab 1 — Registered: events user is in, upcoming only
                 _buildStreamTab(_registeredStream, upcomingOnly: true),
-                // Tab 2 — Created: events user created
                 _buildStreamTab(_createdStream),
-                // Tab 3 — Past: events user was registered for, past only
-                _buildStreamTab(_registeredStream, pastOnly: true),
+                _buildStreamTab(_pastStream),
               ],
             ),
           ),

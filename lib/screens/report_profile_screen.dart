@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../services/report_service.dart';
 import '../utils/app_colors.dart';
 import '../utils/app_paddings.dart';
 import '../utils/app_text_styles.dart';
@@ -14,6 +14,7 @@ class ReportProfileScreen extends StatefulWidget {
 
 class _ReportProfileScreenState extends State<ReportProfileScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _reportService = ReportService();
   final usernameController = TextEditingController();
   final detailsController = TextEditingController();
 
@@ -67,13 +68,12 @@ class _ReportProfileScreenState extends State<ReportProfileScreen> {
     }
 
     try {
-      await FirebaseFirestore.instance.collection('reports').add({
-        'reporterUid': user.uid,
-        'reportedUsername': usernameController.text.trim(),
-        'reason': _selectedReason,
-        'details': detailsController.text.trim(),
-        'timestamp': FieldValue.serverTimestamp(),
-      }).timeout(const Duration(seconds: 10));
+      await _reportService.submitReport(
+        reporterUid: user.uid,
+        reportedUsername: usernameController.text.trim(),
+        reason: _selectedReason!,
+        details: detailsController.text.trim(),
+      ).timeout(const Duration(seconds: 10));
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
