@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../providers/auth_provider.dart';
 import '../services/auth_service.dart';
 import '../utils/app_colors.dart';
 import '../utils/app_paddings.dart';
@@ -60,11 +62,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
-    await authService.signUp(
-      _nameController.text,
-      _emailController.text,
-      _passwordController.text,
-    );
+    try {
+      await authService.signUp(
+        _nameController.text,
+        _emailController.text,
+        _passwordController.text,
+      );
+    } on FirebaseAuthException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AuthProvider.mapAuthError(e.code))),
+        );
+      }
+      if (mounted) setState(() => _isLoading = false);
+      return;
+    }
     if (!mounted) return;
     setState(() => _isLoading = false);
 
@@ -131,18 +143,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       _isLoading
                           ? const CircularProgressIndicator()
                           : SizedBox(
-                              width: double.infinity,
-                              height: 48,
-                              child: ElevatedButton(
-                                onPressed: _handleSignUp,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primary,
-                                  foregroundColor: AppColors.onPrimary,
-                                  shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-                                ),
-                                child: Text('Sign Up', style: AppTextStyles.button),
-                              ),
-                            ),
+                        width: double.infinity,
+                        height: 48,
+                        child: ElevatedButton(
+                          onPressed: _handleSignUp,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: AppColors.onPrimary,
+                            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                          ),
+                          child: Text('Sign Up', style: AppTextStyles.button),
+                        ),
+                      ),
                       const SizedBox(height: AppPaddings.md),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -169,11 +181,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Widget _buildField(
-    TextEditingController controller,
-    String label, {
-    bool obscureText = false,
-    String? Function(String?)? validator,
-  }) {
+      TextEditingController controller,
+      String label, {
+        bool obscureText = false,
+        String? Function(String?)? validator,
+      }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppPaddings.sm),
       child: TextFormField(

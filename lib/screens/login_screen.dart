@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../providers/auth_provider.dart';
 import '../services/auth_service.dart';
 import '../utils/app_colors.dart';
 import '../utils/app_paddings.dart';
@@ -46,13 +48,13 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pushNamedAndRemoveUntil(
           context,
           AppRoutes.home,
-          (route) => false,
+              (route) => false,
         );
       }
-    } on Exception catch (e) {
+    } on FirebaseAuthException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
+          SnackBar(content: Text(AuthProvider.mapAuthError(e.code))),
         );
       }
     } finally {
@@ -85,7 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       'assets/images/logo.png',
                       width: 64,
                       height: 64,
-                      errorBuilder: (_, _, _) => Icon(Icons.event, size: 64, color: AppColors.primary),
+                      errorBuilder: (context, error, stackTrace) => Icon(Icons.event, size: 64, color: AppColors.primary),
                     ),
                     const SizedBox(height: AppPaddings.md),
                     Text(AppStrings.appName, style: AppTextStyles.headline),

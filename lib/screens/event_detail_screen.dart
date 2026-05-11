@@ -32,7 +32,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
 
   bool get _isFull =>
       widget.event.maxAttendees > 0 &&
-      _attendeeCount >= widget.event.maxAttendees;
+          _attendeeCount >= widget.event.maxAttendees;
 
   Future<void> _register() async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
@@ -51,6 +51,30 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Registration failed. Try again.')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isRegistering = false);
+    }
+  }
+
+  Future<void> _unregister() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    setState(() => _isRegistering = true);
+    try {
+      await _eventService.unregisterFromEvent(widget.event.id, uid);
+      if (mounted) {
+        setState(() => _locallyRegistered = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Unregistered successfully.')),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to unregister. Try again.')),
         );
       }
     } finally {
@@ -99,21 +123,21 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                             ),
                             child: e.imageUrl.isNotEmpty
                                 ? Image.network(
-                                    e.imageUrl,
-                                    fit: BoxFit.cover,
-                                    loadingBuilder: (context, child, progress) {
-                                      if (progress == null) return child;
-                                      return Center(
-                                        child: CircularProgressIndicator(color: AppColors.primary),
-                                      );
-                                    },
-                                    errorBuilder: (_, _, _) => Center(
-                                      child: Icon(Icons.broken_image, color: AppColors.textSecondary, size: 40),
-                                    ),
-                                  )
+                              e.imageUrl,
+                              fit: BoxFit.cover,
+                              loadingBuilder: (context, child, progress) {
+                                if (progress == null) return child;
+                                return Center(
+                                  child: CircularProgressIndicator(color: AppColors.primary),
+                                );
+                              },
+                              errorBuilder: (context, error, stackTrace) => Center(
+                                child: Icon(Icons.broken_image, color: AppColors.textSecondary, size: 40),
+                              ),
+                            )
                                 : Center(
-                                    child: Icon(Icons.event, color: AppColors.textSecondary, size: 48),
-                                  ),
+                              child: Icon(Icons.event, color: AppColors.textSecondary, size: 48),
+                            ),
                           ),
                         ),
                         const SizedBox(height: AppPaddings.md),
@@ -187,9 +211,15 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                             children: [
                               Expanded(
                                 child: ElevatedButton(
-                                  onPressed: (_isRegistered || _isFull || _isRegistering) ? null : _register,
+                                  onPressed: _isRegistering
+                                      ? null
+                                      : _isRegistered
+                                      ? _unregister
+                                      : _isFull
+                                      ? null
+                                      : _register,
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.primary,
+                                    backgroundColor: _isRegistered ? AppColors.error : AppColors.primary,
                                     foregroundColor: AppColors.onPrimary,
                                     disabledBackgroundColor: AppColors.border,
                                     padding: const EdgeInsets.symmetric(vertical: AppPaddings.md),
@@ -197,18 +227,18 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                   ),
                                   child: _isRegistering
                                       ? const SizedBox(
-                                          height: 20,
-                                          width: 20,
-                                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                                        )
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                  )
                                       : Text(
-                                          _isRegistered
-                                              ? 'Registered'
-                                              : _isFull
-                                                  ? 'Full'
-                                                  : 'Register',
-                                          style: const TextStyle(fontWeight: FontWeight.bold),
-                                        ),
+                                    _isRegistered
+                                        ? 'Unregister'
+                                        : _isFull
+                                        ? 'Full'
+                                        : 'Register',
+                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: AppPaddings.sm + 4),
@@ -218,10 +248,10 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                   icon: Icon(Icons.chat_bubble_outline, color: AppColors.onPrimary),
                                   onPressed: _isRegistered
                                       ? () => Navigator.pushNamed(
-                                            context,
-                                            AppRoutes.eventChat,
-                                            arguments: widget.event,
-                                          )
+                                    context,
+                                    AppRoutes.eventChat,
+                                    arguments: widget.event,
+                                  )
                                       : null,
                                   tooltip: _isRegistered
                                       ? 'Open chat'
