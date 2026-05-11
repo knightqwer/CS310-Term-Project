@@ -1,7 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../models/app_user.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   User? get currentUser => _auth.currentUser;
 
@@ -17,6 +20,16 @@ class AuthService {
       password: password,
     );
     await credential.user?.updateDisplayName(name);
+
+    final user = AppUser(
+      uid: credential.user!.uid,
+      displayName: name,
+      email: email,
+      bio: '',
+      attendingCount: 0,
+      eventsCreated: 0,
+    );
+    await _db.collection('users').doc(credential.user!.uid).set(user.toMap());
   }
 
   Future<void> resetPassword(String email) async {
