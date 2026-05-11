@@ -64,35 +64,40 @@ class GatherUpApp extends StatelessWidget {
         AppRoutes.login: (_) => const LoginScreen(),
         AppRoutes.signup: (_) => const SignUpScreen(),
         AppRoutes.forgotPassword: (_) => const ForgotPasswordScreen(),
-        AppRoutes.home: (_) => const EventFeedScreen(),
-        AppRoutes.myEvents: (_) => const MyEventsScreen(),
-        AppRoutes.createEvent: (_) => const CreateEventScreen(),
-        AppRoutes.profile: (_) => const ProfileScreen(),
-        AppRoutes.editProfile: (_) => const EditProfileScreen(),
-        AppRoutes.reportProfile: (_) => const ReportProfileScreen(),
-        AppRoutes.eventHistory: (_) => const EventHistoryScreen(),
-        AppRoutes.notifications: (_) => const NotificationsScreen(),
-        AppRoutes.settings: (_) => const SettingsScreen(),
+        AppRoutes.home: (_) => const AuthGate(child: EventFeedScreen()),
+        AppRoutes.myEvents: (_) => const AuthGate(child: MyEventsScreen()),
+        AppRoutes.createEvent: (_) => const AuthGate(child: CreateEventScreen()),
+        AppRoutes.profile: (_) => const AuthGate(child: ProfileScreen()),
+        AppRoutes.editProfile: (_) => const AuthGate(child: EditProfileScreen()),
+        AppRoutes.reportProfile: (_) => const AuthGate(child: ReportProfileScreen()),
+        AppRoutes.eventHistory: (_) => const AuthGate(child: EventHistoryScreen()),
+        AppRoutes.notifications: (_) => const AuthGate(child: NotificationsScreen()),
+        AppRoutes.settings: (_) => const AuthGate(child: SettingsScreen()),
       },
       onGenerateRoute: (settings) {
         if (settings.name == AppRoutes.eventDetail &&
             settings.arguments is Event) {
           return MaterialPageRoute(
-            builder: (_) =>
-                EventDetailScreen(event: settings.arguments as Event),
+            builder: (_) => AuthGate(
+              child: EventDetailScreen(event: settings.arguments as Event),
+            ),
             settings: settings,
           );
         }
         if (settings.name == AppRoutes.eventChat &&
             settings.arguments is Event) {
           return MaterialPageRoute(
-            builder: (_) =>
-                EventChatScreen(event: settings.arguments as Event),
+            builder: (_) => AuthGate(
+              child: EventChatScreen(event: settings.arguments as Event),
+            ),
             settings: settings,
           );
         }
         return null;
       },
+      onUnknownRoute: (_) => MaterialPageRoute(
+        builder: (_) => const AuthGate(),
+      ),
     );
   }
 

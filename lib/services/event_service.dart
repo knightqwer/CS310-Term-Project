@@ -15,26 +15,52 @@ class EventService {
   Stream<List<Event>> createdByUser(String uid) {
     return _events
         .where('createdBy', isEqualTo: uid)
-        .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((s) => s.docs.map(Event.fromFirestore).toList());
+        .map((s) {
+          final list = s.docs.map(Event.fromFirestore).toList();
+          list.sort((a, b) {
+            final ad = a.createdAt;
+            final bd = b.createdAt;
+            if (ad == null && bd == null) return 0;
+            if (ad == null) return 1;
+            if (bd == null) return -1;
+            return bd.compareTo(ad);
+          });
+          return list;
+        });
   }
 
   Stream<List<Event>> registeredByUser(String uid) {
     return _events
         .where('attendeeUids', arrayContains: uid)
-        .orderBy('dateTime')
         .snapshots()
-        .map((s) => s.docs.map(Event.fromFirestore).toList());
+        .map((s) {
+          final list = s.docs.map(Event.fromFirestore).toList();
+          list.sort((a, b) {
+            final ad = a.dateTime;
+            final bd = b.dateTime;
+            if (ad == null && bd == null) return 0;
+            if (ad == null) return 1;
+            if (bd == null) return -1;
+            return ad.compareTo(bd);
+          });
+          return list;
+        });
   }
 
   Stream<List<Event>> pastAttendedByUser(String uid) {
+    final now = DateTime.now();
     return _events
         .where('attendeeUids', arrayContains: uid)
-        .where('dateTime', isLessThan: Timestamp.now())
-        .orderBy('dateTime', descending: true)
         .snapshots()
-        .map((s) => s.docs.map(Event.fromFirestore).toList());
+        .map((s) {
+          final list = s.docs
+              .map(Event.fromFirestore)
+              .where((e) => e.dateTime != null && e.dateTime!.isBefore(now))
+              .toList();
+          list.sort((a, b) => b.dateTime!.compareTo(a.dateTime!));
+          return list;
+        });
   }
 
   Future<DocumentReference> createEvent(Map<String, dynamic> data) {

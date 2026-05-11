@@ -5,11 +5,13 @@ import '../screens/event_feed_screen.dart';
 import '../screens/login_screen.dart';
 
 class AuthGate extends StatelessWidget {
-  const AuthGate({super.key});
+  final Widget? child;
+  const AuthGate({super.key, this.child});
 
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AppAuthProvider>();
-    return auth.isLoggedIn ? const EventFeedScreen() : const LoginScreen();
+    if (!auth.isLoggedIn) return const LoginScreen();
+    return child ?? const EventFeedScreen();
   }
 }
