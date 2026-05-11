@@ -37,7 +37,7 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider<AuthProvider>(create: (_) => AuthProvider()),
+        ChangeNotifierProvider<AppAuthProvider>(create: (_) => AppAuthProvider()),
         ChangeNotifierProvider<ThemeProvider>.value(value: themeProvider),
       ],
       child: const GatherUpApp(),

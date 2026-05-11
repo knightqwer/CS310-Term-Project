@@ -71,7 +71,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     } on FirebaseAuthException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AuthProvider.mapAuthError(e.code))),
+          SnackBar(content: Text(AppAuthProvider.mapAuthError(e.code))),
         );
       }
       if (mounted) setState(() => _isLoading = false);

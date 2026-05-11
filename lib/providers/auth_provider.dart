@@ -2,12 +2,12 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
-class AuthProvider extends ChangeNotifier {
+class AppAuthProvider extends ChangeNotifier {
   final FirebaseAuth _auth;
   late final StreamSubscription<User?> _sub;
   User? _user;
 
-  AuthProvider({FirebaseAuth? auth}) : _auth = auth ?? FirebaseAuth.instance {
+  AppAuthProvider({FirebaseAuth? auth}) : _auth = auth ?? FirebaseAuth.instance {
     _user = _auth.currentUser;
     _sub = _auth.authStateChanges().listen(_onAuthChange);
   }
