@@ -59,7 +59,8 @@ class GatherUpApp extends StatelessWidget {
       theme: _buildTheme(Brightness.light),
       darkTheme: _buildTheme(Brightness.dark),
       themeMode: themeProvider.themeMode,
-      home: const AuthGate(),
+
+      initialRoute: '/',
       routes: {
         AppRoutes.login: (_) => const LoginScreen(),
         AppRoutes.signup: (_) => const SignUpScreen(),
