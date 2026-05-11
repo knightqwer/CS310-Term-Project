@@ -1,12 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-<<<<<<< HEAD
-import '../providers/auth_provider.dart';
-=======
 import '../models/app_user.dart';
 import '../services/auth_service.dart';
 import '../services/user_service.dart';
->>>>>>> 143043c06654a3d3c5c7086615018010511336f2
 import '../utils/app_colors.dart';
 import '../utils/app_paddings.dart';
 import '../utils/app_routes.dart';
@@ -33,33 +29,33 @@ class ProfileScreen extends StatelessWidget {
       body: uid == null
           ? Center(child: Text('Not signed in', style: AppTextStyles.body))
           : StreamBuilder<AppUser?>(
-              stream: userService.userStream(uid),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(
-                    child: CircularProgressIndicator(color: AppColors.primary),
-                  );
-                }
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Text(
-                      'Could not load profile',
-                      style: AppTextStyles.bodySecondary,
-                    ),
-                  );
-                }
-                final user = snapshot.data;
-                if (user == null) {
-                  return Center(
-                    child: Text(
-                      'Profile not found',
-                      style: AppTextStyles.bodySecondary,
-                    ),
-                  );
-                }
-                return _ProfileBody(user: user, authService: authService);
-              },
-            ),
+        stream: userService.userStream(uid),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            );
+          }
+          if (snapshot.hasError) {
+            return Center(
+              child: Text(
+                'Could not load profile',
+                style: AppTextStyles.bodySecondary,
+              ),
+            );
+          }
+          final user = snapshot.data;
+          if (user == null) {
+            return Center(
+              child: Text(
+                'Profile not found',
+                style: AppTextStyles.bodySecondary,
+              ),
+            );
+          }
+          return _ProfileBody(user: user, authService: authService);
+        },
+      ),
     );
   }
 }
@@ -179,7 +175,7 @@ class _ProfileBody extends StatelessWidget {
                             Navigator.pushNamedAndRemoveUntil(
                               context,
                               AppRoutes.login,
-                              (route) => false,
+                                  (route) => false,
                             );
                           }
                         },
@@ -221,7 +217,7 @@ class _ProfileBody extends StatelessWidget {
           child: CircularProgressIndicator(color: AppColors.primary),
         );
       },
-      errorBuilder: (_, _, _) => Icon(
+      errorBuilder: (context, error, stackTrace) => Icon(
         Icons.person,
         color: AppColors.textPrimary,
         size: 60,
@@ -248,11 +244,11 @@ class _ProfileBody extends StatelessWidget {
   }
 
   Widget _buildTile(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
+      BuildContext context, {
+        required IconData icon,
+        required String label,
+        required VoidCallback onTap,
+      }) {
     return InkWell(
       onTap: onTap,
       child: Container(
