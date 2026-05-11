@@ -75,8 +75,9 @@ Top-level collection for user reports. `reportId` is auto-generated.
 | Field | Type | Description |
 |-------|------|-------------|
 | `reporterUid` | `String` | UID of the user who filed the report |
-| `reportedUid` | `String` | UID of the reported user |
-| `reason` | `String` | Reason text provided by the reporter |
+| `reportedUsername` | `String` | Username of the reported profile (as typed by the reporter) |
+| `reason` | `String` | Selected reason category (e.g. "Harassment or bullying") |
+| `details` | `String` | Free-text details provided by the reporter |
 | `createdAt` | `Timestamp` | When the report was submitted |
 
 ---
