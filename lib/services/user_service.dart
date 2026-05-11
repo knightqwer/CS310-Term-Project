@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/app_user.dart';
+import '../models/notification_item.dart';
 
 class UserService {
   final _users = FirebaseFirestore.instance.collection('users');
@@ -19,5 +20,14 @@ class UserService {
 
   Future<void> updateUser(String uid, Map<String, dynamic> data) {
     return _users.doc(uid).update(data);
+  }
+
+  Stream<List<NotificationItem>> notificationsStream(String uid) {
+    return _users
+        .doc(uid)
+        .collection('notifications')
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((s) => s.docs.map(NotificationItem.fromFirestore).toList());
   }
 }
