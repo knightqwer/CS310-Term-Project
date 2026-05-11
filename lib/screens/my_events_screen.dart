@@ -1,4 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../models/event.dart';
+import '../utils/app_colors.dart';
+import '../utils/app_paddings.dart';
+import '../utils/app_routes.dart';
+import '../utils/app_strings.dart';
+import '../utils/app_text_styles.dart';
 
 class MyEventsScreen extends StatefulWidget {
   const MyEventsScreen({super.key});
@@ -12,10 +20,21 @@ class _MyEventsScreenState extends State<MyEventsScreen>
   late TabController tabController;
   final searchController = TextEditingController();
 
-  // TODO: Replace with actual data from Firestore
-  final List<dynamic> registeredEvents = [];
-  final List<dynamic> createdEvents = [];
-  final List<dynamic> pastEvents = [];
+  String get _uid => FirebaseAuth.instance.currentUser?.uid ?? '';
+
+  // Query 1: events the user is registered for (attendeeUids contains uid)
+  Stream<List<Event>> get _registeredStream => FirebaseFirestore.instance
+      .collection('events')
+      .where('attendeeUids', arrayContains: _uid)
+      .snapshots()
+      .map((snap) => snap.docs.map(Event.fromFirestore).toList());
+
+  // Query 2: events the user created
+  Stream<List<Event>> get _createdStream => FirebaseFirestore.instance
+      .collection('events')
+      .where('createdBy', isEqualTo: _uid)
+      .snapshots()
+      .map((snap) => snap.docs.map(Event.fromFirestore).toList());
 
   @override
   void initState() {
@@ -35,76 +54,132 @@ class _MyEventsScreenState extends State<MyEventsScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.event_busy,
-            size: 64,
-            color: Colors.grey[600],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'No Events Yet',
-            style: TextStyle(
-              color: Colors.grey[400],
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+          Icon(Icons.event_busy, size: 64, color: AppColors.primary),
+          const SizedBox(height: AppPaddings.md),
+          Text('No Events Yet', style: AppTextStyles.title),
         ],
       ),
     );
   }
 
-  Widget _buildEventList(List<dynamic> events) {
-    if (events.isEmpty) {
-      return _buildEmptyState();
-    }
-
-    
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      itemCount: events.length,
-      itemBuilder: (context, index) {
-        return Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: const Color(0xFF212121),
-            border: Border.all(color: Colors.grey[700]!),
-          ),
-          child: Column(
+  Widget _buildEventCard(Event event) {
+    return Card(
+      color: AppColors.surface,
+      margin: const EdgeInsets.only(bottom: AppPaddings.md),
+      shape: RoundedRectangleBorder(
+        side: BorderSide(color: AppColors.border),
+        borderRadius: BorderRadius.zero,
+      ),
+      child: InkWell(
+        onTap: () => Navigator.pushNamed(context, AppRoutes.eventDetail, arguments: event),
+        child: Padding(
+          padding: const EdgeInsets.all(AppPaddings.md),
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                events[index]['title'] ?? 'Event Title',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                  border: Border.all(color: AppColors.border),
                 ),
+                child: event.imageUrl.isNotEmpty
+                    ? Image.network(event.imageUrl, fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => Icon(Icons.event, color: AppColors.primary))
+                    : Icon(Icons.event, color: AppColors.primary),
               ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Icon(Icons.calendar_today,
-                      size: 14, color: Colors.grey[400]),
-                  const SizedBox(width: 6),
-                  Text(
-                    events[index]['date'] ?? 'TBD',
-                    style: TextStyle(color: Colors.grey[400], fontSize: 13),
-                  ),
-                  const SizedBox(width: 16),
-                  Icon(Icons.location_on,
-                      size: 14, color: Colors.grey[400]),
-                  const SizedBox(width: 4),
-                  Text(
-                    events[index]['location'] ?? 'TBD',
-                    style: TextStyle(color: Colors.grey[400], fontSize: 13),
-                  ),
-                ],
+              const SizedBox(width: AppPaddings.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      event.title,
+                      style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: AppPaddings.xs),
+                    Row(
+                      children: [
+                        Icon(Icons.calendar_today, size: 14, color: AppColors.textSecondary),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            event.date,
+                            style: AppTextStyles.bodySecondary,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Icon(Icons.location_on, size: 14, color: AppColors.textSecondary),
+                        const SizedBox(width: 4),
+                        Flexible(
+                          child: Text(
+                            event.location,
+                            style: AppTextStyles.bodySecondary,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppPaddings.xs),
+                    if (event.category.isNotEmpty)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: AppPaddings.sm, vertical: 2),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.border),
+                        ),
+                        child: Text(
+                          event.category,
+                          style: AppTextStyles.bodySecondary.copyWith(fontSize: 11),
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ],
           ),
-        );
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEventList(List<Event> events) {
+    final query = searchController.text.trim().toLowerCase();
+    final filtered = query.isEmpty
+        ? events
+        : events.where((e) => e.title.toLowerCase().contains(query)).toList();
+
+    if (filtered.isEmpty) return _buildEmptyState();
+
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: AppPaddings.md, vertical: AppPaddings.sm),
+      itemCount: filtered.length,
+      itemBuilder: (context, index) => _buildEventCard(filtered[index]),
+    );
+  }
+
+  Widget _buildStreamTab(Stream<List<Event>> stream, {bool pastOnly = false, bool upcomingOnly = false}) {
+    return StreamBuilder<List<Event>>(
+      stream: stream,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator(color: AppColors.primary));
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Error loading events', style: AppTextStyles.body));
+        }
+        final now = DateTime.now();
+        var events = snapshot.data ?? [];
+        if (pastOnly) {
+          events = events.where((e) => e.dateTime != null && e.dateTime!.isBefore(now)).toList();
+        } else if (upcomingOnly) {
+          events = events.where((e) => e.dateTime == null || e.dateTime!.isAfter(now)).toList();
+        }
+        return _buildEventList(events);
       },
     );
   }
@@ -112,28 +187,18 @@ class _MyEventsScreenState extends State<MyEventsScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: Colors.black,
-        elevation: 0,
-        title: const Text(
-          'My Events',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-          ),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          onPressed: () => Navigator.pop(context),
         ),
-        centerTitle: false,
+        title: Text('My Events', style: AppTextStyles.title),
         bottom: TabBar(
           controller: tabController,
-          indicatorColor: Colors.white,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.grey[500],
-          labelStyle: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
+          indicatorColor: AppColors.primary,
+          labelColor: AppColors.primary,
+          unselectedLabelColor: AppColors.textSecondary,
           tabs: const [
             Tab(text: 'Registered'),
             Tab(text: 'Created'),
@@ -143,45 +208,48 @@ class _MyEventsScreenState extends State<MyEventsScreen>
       ),
       body: Column(
         children: [
-          
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppPaddings.md),
             child: TextField(
               controller: searchController,
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: AppColors.textPrimary),
               decoration: InputDecoration(
-                hintText: 'Search events...',
-                hintStyle: TextStyle(color: Colors.grey[500]),
-                prefixIcon: Icon(Icons.search, color: Colors.grey[400]),
+                hintText: AppStrings.searchHint,
+                hintStyle: TextStyle(color: AppColors.textHint),
+                prefixIcon: Icon(Icons.search, color: AppColors.textSecondary),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.zero,
-                  borderSide: BorderSide(color: Colors.grey[700]!),
+                  borderSide: BorderSide(color: AppColors.border),
                 ),
-                focusedBorder: const OutlineInputBorder(
+                focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.zero,
-                  borderSide: BorderSide(color: Colors.white),
+                  borderSide: BorderSide(color: AppColors.primary),
                 ),
                 contentPadding: const EdgeInsets.symmetric(vertical: 12),
               ),
-              onChanged: (value) {
-                
-                setState(() {});
-              },
+              onChanged: (_) => setState(() {}),
             ),
           ),
-
-          
           Expanded(
             child: TabBarView(
               controller: tabController,
               children: [
-                _buildEventList(registeredEvents),
-                _buildEventList(createdEvents),
-                _buildEventList(pastEvents),
+                // Tab 1 — Registered: events user is in, upcoming only
+                _buildStreamTab(_registeredStream, upcomingOnly: true),
+                // Tab 2 — Created: events user created
+                _buildStreamTab(_createdStream),
+                // Tab 3 — Past: events user was registered for, past only
+                _buildStreamTab(_registeredStream, pastOnly: true),
               ],
             ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.onPrimary,
+        onPressed: () => Navigator.pushNamed(context, AppRoutes.createEvent),
+        child: const Icon(Icons.add),
       ),
     );
   }

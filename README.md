@@ -4,5 +4,6 @@ Our application GatherUp has a unique premise: We offer our users the opportunit
 
 This mobile app is being developed using the Flutter framework.
 
-Our team consists of : Youssef Al Bassumi, Kaan Gürelik, İsmail Efe İnce,Utku Özgenç and İsmail Kerem Mescioğlu.
+Our team consists of : Atakan Öztürk, Youssef El Bassumi, Kaan Gürelik, İsmail Efe İnce,Utku Özgenç and İsmail Kerem Mescioğlu.
 
+( Step 3 Information for TA: The Login form is currently a mockup. You can enter any input for the email/password fields and navigate freely. )

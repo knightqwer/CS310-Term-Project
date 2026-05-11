@@ -1,62 +1,150 @@
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart';
-import 'login_screen.dart';
+import '../utils/app_colors.dart';
+import '../utils/app_paddings.dart';
+import '../utils/app_routes.dart';
+import '../utils/app_strings.dart';
+import '../utils/app_text_styles.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final authService = AuthService();
-
     return Scaffold(
-      backgroundColor: Colors.black,
-      body: Center(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: Row(
+          children: [
+            Image.asset(
+              'assets/images/logo.png',
+              width: 28,
+              height: 28,
+              errorBuilder: (_, _, _) => Icon(Icons.event, size: 28, color: AppColors.primary),
+            ),
+            const SizedBox(width: AppPaddings.sm),
+            Text(AppStrings.appName, style: AppTextStyles.title),
+          ],
+        ),
+      ),
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isWide = constraints.maxWidth > 600;
+            return SingleChildScrollView(
+              padding: AppPaddings.screen,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SizedBox(height: AppPaddings.lg),
+                  Text('Event Feed', style: AppTextStyles.headline),
+                  const SizedBox(height: AppPaddings.sm),
+                  Text(
+                    'Browse, search, and discover campus events.',
+                    style: AppTextStyles.bodySecondary,
+                  ),
+                  const SizedBox(height: AppPaddings.lg),
+                  _buildQuickActions(context, isWide),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+      bottomNavigationBar: _HomeBottomNav(currentIndex: 0),
+    );
+  }
+
+  Widget _buildQuickActions(BuildContext context, bool isWide) {
+    final items = [
+      _QuickAction(icon: Icons.calendar_today, label: 'My Events', route: AppRoutes.myEvents),
+      _QuickAction(icon: Icons.add_circle_outline, label: 'Create Event', route: AppRoutes.createEvent),
+      _QuickAction(icon: Icons.event_note, label: 'Event Detail', route: AppRoutes.eventDetail),
+      _QuickAction(icon: Icons.chat_bubble_outline, label: 'Event Chat', route: AppRoutes.eventChat),
+      _QuickAction(icon: Icons.person, label: 'Profile', route: AppRoutes.profile),
+      _QuickAction(icon: Icons.edit, label: 'Edit Profile', route: AppRoutes.editProfile),
+    ];
+
+    return GridView.count(
+      crossAxisCount: isWide ? 3 : 2,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      mainAxisSpacing: AppPaddings.md,
+      crossAxisSpacing: AppPaddings.md,
+      childAspectRatio: 1.6,
+      children: items
+          .map((a) => _buildActionTile(context, a))
+          .toList(),
+    );
+  }
+
+  Widget _buildActionTile(BuildContext context, _QuickAction action) {
+    return InkWell(
+      onTap: () => Navigator.pushNamed(context, action.route),
+      child: Container(
+        padding: const EdgeInsets.all(AppPaddings.md),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          border: Border.all(color: AppColors.border),
+        ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              'Welcome to QuizRadar',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: 200,
-              height: 40,
-              child: ElevatedButton(
-                onPressed: () async {
-                  await authService.signOut();
-                  if (context.mounted) {
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(builder: (context) => const LoginScreen()),
-                      (route) => false,
-                    );
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.black,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.zero,
-                  ),
-                ),
-                child: const Text(
-                  'Sign Out',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
+            Icon(action.icon, color: AppColors.textPrimary, size: 28),
+            const SizedBox(height: AppPaddings.sm),
+            Text(
+              action.label,
+              textAlign: TextAlign.center,
+              style: AppTextStyles.body,
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _QuickAction {
+  final IconData icon;
+  final String label;
+  final String route;
+  const _QuickAction({required this.icon, required this.label, required this.route});
+}
+
+class _HomeBottomNav extends StatelessWidget {
+  final int currentIndex;
+  const _HomeBottomNav({required this.currentIndex});
+
+  @override
+  Widget build(BuildContext context) {
+    return BottomNavigationBar(
+      type: BottomNavigationBarType.fixed,
+      backgroundColor: AppColors.surface,
+      selectedItemColor: AppColors.primary,
+      unselectedItemColor: AppColors.textSecondary,
+      currentIndex: currentIndex,
+      onTap: (index) {
+        switch (index) {
+          case 0:
+            Navigator.pushNamedAndRemoveUntil(context, AppRoutes.home, (_) => false);
+            break;
+          case 1:
+            Navigator.pushNamed(context, AppRoutes.myEvents);
+            break;
+          case 2:
+            Navigator.pushNamed(context, AppRoutes.createEvent);
+            break;
+          case 3:
+            Navigator.pushNamed(context, AppRoutes.profile);
+            break;
+        }
+      },
+      items: const [
+        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+        BottomNavigationBarItem(icon: Icon(Icons.calendar_today), label: 'My Events'),
+        BottomNavigationBarItem(icon: Icon(Icons.add_circle_outline), label: 'Create'),
+        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+      ],
     );
   }
 }

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
-import 'signup_screen.dart';
-import 'forgot_password_screen.dart';
-import 'home_screen.dart';
+import '../utils/app_colors.dart';
+import '../utils/app_paddings.dart';
+import '../utils/app_routes.dart';
+import '../utils/app_strings.dart';
+import '../utils/app_text_styles.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -12,169 +14,162 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final authService = AuthService(); // making a connection to our fake auth logic
-  final emailController = TextEditingController(); // capturing what the user types in email
-  final passwordController = TextEditingController(); // capturing what the user types in password
-  bool obscurePassword = true; // keeping the password hidden by default
-  bool isLoading = false; // tracking if we are currently trying to log in
+  final authService = AuthService();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  bool obscurePassword = true;
+  bool isLoading = false;
 
   @override
   void dispose() {
-    emailController.dispose(); // cleaning up the email controller to keep memory happy
-    passwordController.dispose(); // cleaning up the password controller
+    emailController.dispose();
+    passwordController.dispose();
     super.dispose();
   }
 
   void handleLogin() async {
-    if (emailController.text.isEmpty || passwordController.text.isEmpty) { // checking if user left anything blank
+    if (emailController.text.isEmpty || passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields')), // telling them to fill the boxes
+        const SnackBar(content: Text('Please fill in all fields')),
       );
       return;
     }
 
-    setState(() => isLoading = true); // turning on the loading spinner
+    setState(() => isLoading = true);
 
     try {
       await authService.signIn(
         emailController.text,
         passwordController.text,
-      ); // sending the data to our mocked service
+      );
       if (mounted) {
-        Navigator.pushAndRemoveUntil(
+        Navigator.pushNamedAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()), // moving to home after success
-              (route) => false, // clearing the back history so they cant go back to login
+          AppRoutes.home,
+          (route) => false,
         );
       }
     } on Exception catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())), // showing error message if something breaks
+          SnackBar(content: Text(e.toString())),
         );
       }
     } finally {
-      if (mounted) setState(() => isLoading = false); // turning off the spinner no matter what happens
+      if (mounted) setState(() => isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFD9D9D9), // that dark grey background from the design
-      body: Center(
-        child: SingleChildScrollView( // making sure it doesnt overflow when keyboard pops up
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 48),
-            decoration: const BoxDecoration(
-              color: Color(0xFFE0E0E0), // a slightly lighter card for the inputs
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min, // only taking up the space needed for the form
-              children: [
-                const Text(
-                  'GatherUp', // big main branding text
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 36,
-                    fontWeight: FontWeight.bold,
-                  ),
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: AppPaddings.lg),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: screenWidth > 600 ? 480 : double.infinity),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: AppPaddings.xl, vertical: AppPaddings.xl + AppPaddings.md),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  border: Border.all(color: AppColors.border),
                 ),
-                Text(
-                  'Log in to your account', // tiny subtitle under the logo
-                  style: TextStyle(
-                    color: Colors.grey[700],
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(height: 32), // space before the first input
-                TextField(
-                  controller: emailController,
-                  decoration: InputDecoration(
-                    hintText: 'Email', // hint text inside the box
-                    filled: true,
-                    fillColor: Colors.white, // white box so it pops
-                    border: OutlineInputBorder(borderRadius: BorderRadius.zero), // sharp square corners
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: passwordController,
-                  obscureText: obscurePassword, // hiding the password characters
-                  decoration: InputDecoration(
-                    hintText: 'Password',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.zero), // matching the square look
-                  ),
-                ),
-                Align(
-                  alignment: Alignment.centerRight, // pushing this to the right side
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const ForgotPasswordScreen(), // jumping to reset password screen
-                        ),
-                      );
-                    },
-                    child: const Text(
-                      'forgot your password?', // small link text
-                      style: TextStyle(color: Colors.black, fontSize: 13),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                if (isLoading)
-                  const CircularProgressIndicator() // showing the spinner while we wait
-                else
-                  SizedBox(
-                    width: double.infinity, // making the button full width
-                    height: 48,
-                    child: ElevatedButton(
-                      onPressed: handleLogin, // running the login logic on tap
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.black,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.zero, // keeping the square style
-                        ),
-                      ),
-                      child: const Text(
-                        'Login',
-                        style: TextStyle(fontSize: 16),
-                      ),
-                    ),
-                  ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      "Don't have any account yet? ", // prompting the user to sign up
-                      style: TextStyle(color: Colors.grey[700], fontSize: 12),
+                    Image.asset(
+                      'assets/images/logo.png',
+                      width: 64,
+                      height: 64,
+                      errorBuilder: (_, _, _) => Icon(Icons.event, size: 64, color: AppColors.primary),
                     ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const SignUpScreen()), // going to the sign up page
-                        );
-                      },
-                      child: const Text(
-                        'Sign Up',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
+                    const SizedBox(height: AppPaddings.md),
+                    Text(AppStrings.appName, style: AppTextStyles.headline),
+                    Text(AppStrings.loginSubtitle, style: AppTextStyles.subtitle),
+                    const SizedBox(height: AppPaddings.xl),
+                    TextField(
+                      controller: emailController,
+                      style: TextStyle(color: AppColors.textPrimary),
+                      decoration: InputDecoration(
+                        hintText: 'Email',
+                        hintStyle: TextStyle(color: AppColors.textHint),
+                        filled: true,
+                        fillColor: AppColors.background,
+                        border: const OutlineInputBorder(borderRadius: BorderRadius.zero),
+                      ),
+                    ),
+                    const SizedBox(height: AppPaddings.md),
+                    TextField(
+                      controller: passwordController,
+                      obscureText: obscurePassword,
+                      style: TextStyle(color: AppColors.textPrimary),
+                      decoration: InputDecoration(
+                        hintText: 'Password',
+                        hintStyle: TextStyle(color: AppColors.textHint),
+                        filled: true,
+                        fillColor: AppColors.background,
+                        border: const OutlineInputBorder(borderRadius: BorderRadius.zero),
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, AppRoutes.forgotPassword);
+                        },
+                        child: Text(
+                          'forgot your password?',
+                          style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
                         ),
                       ),
+                    ),
+                    const SizedBox(height: AppPaddings.md),
+                    if (isLoading)
+                      const CircularProgressIndicator()
+                    else
+                      SizedBox(
+                        width: double.infinity,
+                        height: 48,
+                        child: ElevatedButton(
+                          onPressed: handleLogin,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: AppColors.onPrimary,
+                            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                          ),
+                          child: Text('Login', style: AppTextStyles.button),
+                        ),
+                      ),
+                    const SizedBox(height: AppPaddings.md),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Don't have any account yet? ",
+                          style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.pushNamed(context, AppRoutes.signup);
+                          },
+                          child: Text(
+                            'Sign Up',
+                            style: TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
