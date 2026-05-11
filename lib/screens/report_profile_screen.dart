@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../utils/app_colors.dart';
 import '../utils/app_paddings.dart';
 import '../utils/app_text_styles.dart';
@@ -54,12 +56,41 @@ class _ReportProfileScreenState extends State<ReportProfileScreen> {
       return;
     }
 
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('You must be logged in to submit a report')),
+        );
+      }
+      return;
+    }
+
+    try {
+      await FirebaseFirestore.instance.collection('reports').add({
+        'reporterUid': user.uid,
+        'reportedUsername': usernameController.text.trim(),
+        'reason': _selectedReason,
+        'details': detailsController.text.trim(),
+        'timestamp': FieldValue.serverTimestamp(),
+      }).timeout(const Duration(seconds: 10));
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to submit report: $e')),
+        );
+      }
+      return;
+    }
+
+    if (!mounted) return;
+
     await showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: const Text('Report Submitted', style: TextStyle(color: AppColors.textPrimary)),
-        content: const Text(
+        title: Text('Report Submitted', style: TextStyle(color: AppColors.textPrimary)),
+        content: Text(
           'Thanks for helping keep the community safe.',
           style: TextStyle(color: AppColors.textPrimary),
         ),
@@ -69,7 +100,7 @@ class _ReportProfileScreenState extends State<ReportProfileScreen> {
               Navigator.pop(ctx);
               Navigator.pop(context);
             },
-            child: const Text('OK', style: TextStyle(color: AppColors.primary)),
+            child: Text('OK', style: TextStyle(color: AppColors.primary)),
           ),
         ],
       ),
@@ -84,7 +115,7 @@ class _ReportProfileScreenState extends State<ReportProfileScreen> {
         borderRadius: BorderRadius.zero,
         borderSide: BorderSide(color: AppColors.border),
       ),
-      focusedBorder: const OutlineInputBorder(
+      focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.zero,
         borderSide: BorderSide(color: AppColors.primary),
       ),
@@ -105,7 +136,7 @@ class _ReportProfileScreenState extends State<ReportProfileScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text('Report a Profile', style: AppTextStyles.title),
@@ -138,7 +169,7 @@ class _ReportProfileScreenState extends State<ReportProfileScreen> {
                         TextFormField(
                           controller: usernameController,
                           validator: _validateUsername,
-                          style: const TextStyle(color: AppColors.textPrimary),
+                          style: TextStyle(color: AppColors.textPrimary),
                           decoration: _inputDecoration('Enter username'),
                         ),
                         const SizedBox(height: AppPaddings.lg),
@@ -158,7 +189,7 @@ class _ReportProfileScreenState extends State<ReportProfileScreen> {
                           controller: detailsController,
                           validator: _validateDetails,
                           maxLines: 5,
-                          style: const TextStyle(color: AppColors.textPrimary),
+                          style: TextStyle(color: AppColors.textPrimary),
                           decoration: _inputDecoration('Provide additional details...'),
                         ),
                         const SizedBox(height: AppPaddings.xl),

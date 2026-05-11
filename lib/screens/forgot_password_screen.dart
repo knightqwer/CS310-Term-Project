@@ -55,7 +55,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -86,7 +86,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     const SizedBox(height: AppPaddings.xl),
                     TextField(
                       controller: emailController,
-                      style: const TextStyle(color: AppColors.textPrimary),
+                      style: TextStyle(color: AppColors.textPrimary),
                       decoration: InputDecoration(
                         labelText: 'Email',
                         labelStyle: TextStyle(color: AppColors.textSecondary),
@@ -96,7 +96,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           borderRadius: BorderRadius.zero,
                           borderSide: BorderSide(color: AppColors.border),
                         ),
-                        focusedBorder: const OutlineInputBorder(
+                        focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.zero,
                           borderSide: BorderSide(color: AppColors.primary),
                         ),
@@ -120,7 +120,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     const SizedBox(height: AppPaddings.md),
                     GestureDetector(
                       onTap: () => Navigator.pop(context),
-                      child: const Text(
+                      child: Text(
                         'Back to Log In',
                         style: TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.bold),
                       ),

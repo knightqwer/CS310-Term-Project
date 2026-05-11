@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../models/event.dart';
 import '../utils/app_colors.dart';
@@ -18,49 +20,21 @@ class _MyEventsScreenState extends State<MyEventsScreen>
   late TabController tabController;
   final searchController = TextEditingController();
 
-  final List<Event> registeredEvents = [
-    const Event(
-      id: 'r1',
-      title: 'Study Session',
-      date: 'Apr 14, 2026',
-      location: 'Information Center',
-      category: 'Study',
-    ),
-    const Event(
-      id: 'r2',
-      title: 'Hackathon Kickoff',
-      date: 'Apr 20, 2026',
-      location: 'FENS Building',
-      category: 'Hackathon',
-    ),
-    const Event(
-      id: 'r3',
-      title: 'Basketball Match',
-      date: 'Apr 22, 2026',
-      location: 'Sports Center',
-      category: 'Sports',
-    ),
-  ];
+  String get _uid => FirebaseAuth.instance.currentUser?.uid ?? '';
 
-  final List<Event> createdEvents = [
-    const Event(
-      id: 'c1',
-      title: 'CS Study Group',
-      date: 'Apr 18, 2026',
-      location: 'Library',
-      category: 'Study',
-    ),
-  ];
+  // Query 1: events the user is registered for (attendeeUids contains uid)
+  Stream<List<Event>> get _registeredStream => FirebaseFirestore.instance
+      .collection('events')
+      .where('attendeeUids', arrayContains: _uid)
+      .snapshots()
+      .map((snap) => snap.docs.map(Event.fromFirestore).toList());
 
-  final List<Event> pastEvents = [
-    const Event(
-      id: 'p1',
-      title: 'Welcome Week Party',
-      date: 'Sep 15, 2025',
-      location: 'Student Center',
-      category: 'Social',
-    ),
-  ];
+  // Query 2: events the user created
+  Stream<List<Event>> get _createdStream => FirebaseFirestore.instance
+      .collection('events')
+      .where('createdBy', isEqualTo: _uid)
+      .snapshots()
+      .map((snap) => snap.docs.map(Event.fromFirestore).toList());
 
   @override
   void initState() {
@@ -75,21 +49,12 @@ class _MyEventsScreenState extends State<MyEventsScreen>
     super.dispose();
   }
 
-  void removeEvent(List<Event> source, Event event) {
-    setState(() {
-      source.removeWhere((e) => e.id == event.id);
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Removed "${event.title}"')),
-    );
-  }
-
   Widget _buildEmptyState() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.event_busy, size: 64, color: AppColors.primary),
+          Icon(Icons.event_busy, size: 64, color: AppColors.primary),
           const SizedBox(height: AppPaddings.md),
           Text('No Events Yet', style: AppTextStyles.title),
         ],
@@ -97,7 +62,7 @@ class _MyEventsScreenState extends State<MyEventsScreen>
     );
   }
 
-  Widget _buildEventCard(List<Event> source, Event event) {
+  Widget _buildEventCard(Event event) {
     return Card(
       color: AppColors.surface,
       margin: const EdgeInsets.only(bottom: AppPaddings.md),
@@ -105,80 +70,78 @@ class _MyEventsScreenState extends State<MyEventsScreen>
         side: BorderSide(color: AppColors.border),
         borderRadius: BorderRadius.zero,
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(AppPaddings.md),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: AppColors.background,
-                border: Border.all(color: AppColors.border),
+      child: InkWell(
+        onTap: () => Navigator.pushNamed(context, AppRoutes.eventDetail, arguments: event),
+        child: Padding(
+          padding: const EdgeInsets.all(AppPaddings.md),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: event.imageUrl.isNotEmpty
+                    ? Image.network(event.imageUrl, fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => Icon(Icons.event, color: AppColors.primary))
+                    : Icon(Icons.event, color: AppColors.primary),
               ),
-              child: Image.asset(
-                'assets/images/logo.png',
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => const Icon(Icons.event, color: AppColors.primary),
-              ),
-            ),
-            const SizedBox(width: AppPaddings.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    event.title,
-                    style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: AppPaddings.xs),
-                  Row(
-                    children: [
-                      Icon(Icons.calendar_today, size: 14, color: AppColors.textSecondary),
-                      const SizedBox(width: 6),
-                      Flexible(
+              const SizedBox(width: AppPaddings.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      event.title,
+                      style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: AppPaddings.xs),
+                    Row(
+                      children: [
+                        Icon(Icons.calendar_today, size: 14, color: AppColors.textSecondary),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            event.date,
+                            style: AppTextStyles.bodySecondary,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Icon(Icons.location_on, size: 14, color: AppColors.textSecondary),
+                        const SizedBox(width: 4),
+                        Flexible(
+                          child: Text(
+                            event.location,
+                            style: AppTextStyles.bodySecondary,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppPaddings.xs),
+                    if (event.category.isNotEmpty)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: AppPaddings.sm, vertical: 2),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.border),
+                        ),
                         child: Text(
-                          event.date,
-                          style: AppTextStyles.bodySecondary,
-                          overflow: TextOverflow.ellipsis,
+                          event.category,
+                          style: AppTextStyles.bodySecondary.copyWith(fontSize: 11),
                         ),
                       ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Icon(Icons.location_on, size: 14, color: AppColors.textSecondary),
-                      const SizedBox(width: 4),
-                      Flexible(
-                        child: Text(
-                          event.location,
-                          style: AppTextStyles.bodySecondary,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppPaddings.xs),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: AppPaddings.sm, vertical: 2),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.border),
-                    ),
-                    child: Text(
-                      event.category,
-                      style: AppTextStyles.bodySecondary.copyWith(fontSize: 11),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete_outline, color: AppColors.error),
-              onPressed: () => removeEvent(source, event),
-              tooltip: 'Remove',
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -195,7 +158,29 @@ class _MyEventsScreenState extends State<MyEventsScreen>
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: AppPaddings.md, vertical: AppPaddings.sm),
       itemCount: filtered.length,
-      itemBuilder: (context, index) => _buildEventCard(events, filtered[index]),
+      itemBuilder: (context, index) => _buildEventCard(filtered[index]),
+    );
+  }
+
+  Widget _buildStreamTab(Stream<List<Event>> stream, {bool pastOnly = false, bool upcomingOnly = false}) {
+    return StreamBuilder<List<Event>>(
+      stream: stream,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator(color: AppColors.primary));
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Error loading events', style: AppTextStyles.body));
+        }
+        final now = DateTime.now();
+        var events = snapshot.data ?? [];
+        if (pastOnly) {
+          events = events.where((e) => e.dateTime != null && e.dateTime!.isBefore(now)).toList();
+        } else if (upcomingOnly) {
+          events = events.where((e) => e.dateTime == null || e.dateTime!.isAfter(now)).toList();
+        }
+        return _buildEventList(events);
+      },
     );
   }
 
@@ -205,7 +190,7 @@ class _MyEventsScreenState extends State<MyEventsScreen>
       backgroundColor: AppColors.background,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text('My Events', style: AppTextStyles.title),
@@ -227,7 +212,7 @@ class _MyEventsScreenState extends State<MyEventsScreen>
             padding: const EdgeInsets.all(AppPaddings.md),
             child: TextField(
               controller: searchController,
-              style: const TextStyle(color: AppColors.textPrimary),
+              style: TextStyle(color: AppColors.textPrimary),
               decoration: InputDecoration(
                 hintText: AppStrings.searchHint,
                 hintStyle: TextStyle(color: AppColors.textHint),
@@ -236,7 +221,7 @@ class _MyEventsScreenState extends State<MyEventsScreen>
                   borderRadius: BorderRadius.zero,
                   borderSide: BorderSide(color: AppColors.border),
                 ),
-                focusedBorder: const OutlineInputBorder(
+                focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.zero,
                   borderSide: BorderSide(color: AppColors.primary),
                 ),
@@ -249,9 +234,12 @@ class _MyEventsScreenState extends State<MyEventsScreen>
             child: TabBarView(
               controller: tabController,
               children: [
-                _buildEventList(registeredEvents),
-                _buildEventList(createdEvents),
-                _buildEventList(pastEvents),
+                // Tab 1 — Registered: events user is in, upcoming only
+                _buildStreamTab(_registeredStream, upcomingOnly: true),
+                // Tab 2 — Created: events user created
+                _buildStreamTab(_createdStream),
+                // Tab 3 — Past: events user was registered for, past only
+                _buildStreamTab(_registeredStream, pastOnly: true),
               ],
             ),
           ),

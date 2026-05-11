@@ -46,10 +46,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: const Text('Profile Saved', style: TextStyle(color: AppColors.textPrimary)),
+        title: Text('Profile Saved', style: TextStyle(color: AppColors.textPrimary)),
         content: Text(
           AppStrings.saveSuccess,
-          style: const TextStyle(color: AppColors.textPrimary),
+          style: TextStyle(color: AppColors.textPrimary),
         ),
         actions: [
           TextButton(
@@ -57,7 +57,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               Navigator.pop(ctx);
               Navigator.pop(context);
             },
-            child: const Text('OK', style: TextStyle(color: AppColors.primary)),
+            child: Text('OK', style: TextStyle(color: AppColors.primary)),
           ),
         ],
       ),
@@ -72,7 +72,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         borderRadius: BorderRadius.zero,
         borderSide: BorderSide(color: AppColors.border),
       ),
-      focusedBorder: const OutlineInputBorder(
+      focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.zero,
         borderSide: BorderSide(color: AppColors.primary),
       ),
@@ -97,7 +97,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text('Edit Profile', style: AppTextStyles.title),
@@ -135,7 +135,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                   child: Image.asset(
                                     'assets/images/logo.png',
                                     fit: BoxFit.cover,
-                                    errorBuilder: (_, _, _) => const Icon(
+                                    errorBuilder: (_, _, _) => Icon(
                                       Icons.person,
                                       color: AppColors.textPrimary,
                                       size: 60,
@@ -148,11 +148,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 right: 0,
                                 child: Container(
                                   padding: const EdgeInsets.all(6),
-                                  decoration: const BoxDecoration(
+                                  decoration: BoxDecoration(
                                     color: AppColors.primary,
                                     shape: BoxShape.circle,
                                   ),
-                                  child: const Icon(
+                                  child: Icon(
                                     Icons.camera_alt,
                                     color: AppColors.onPrimary,
                                     size: 18,
@@ -166,7 +166,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         TextFormField(
                           controller: nameController,
                           validator: _validateName,
-                          style: const TextStyle(color: AppColors.textPrimary),
+                          style: TextStyle(color: AppColors.textPrimary),
                           decoration: _inputDecoration('Full Name'),
                         ),
                         const SizedBox(height: AppPaddings.md),
@@ -180,7 +180,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         TextFormField(
                           controller: bioController,
                           validator: _validateBio,
-                          style: const TextStyle(color: AppColors.textPrimary),
+                          style: TextStyle(color: AppColors.textPrimary),
                           maxLines: 4,
                           decoration: _inputDecoration('Bio'),
                         ),
